@@ -74,7 +74,8 @@
                             </div>
                         </div>
                     </fieldset>
-                    <button type="submit" id="generate-btn">Buat Prompt untuk Adegan Ini</button>
+                    
+                    <button type="submit" id="generate-btn">Buat Prompt untuk Adegan Ini (ID)</button>
                 </form>
             </div>
         </main>
@@ -82,12 +83,22 @@
         <aside id="output-panel">
             <div class="output-container">
                 <div class="output-column">
-                    <h2>Prompt (Bahasa Indonesia)</h2><p>Anda bisa menyunting hasil prompt di kolom ini.</p><textarea id="prompt-id" rows="20"></textarea><button type="button" id="copy-id-btn" class="copy-btn">Salin Prompt</button>
+                    <h2>Prompt (Bahasa Indonesia)</h2>
+                    <p>Hasil naskah Bahasa Indonesia akan muncul di sini.</p>
+                    <textarea id="prompt-id" rows="20"></textarea>
+                    <button type="button" id="copy-id-btn" class="copy-btn">Salin Prompt ID</button>
                 </div>
                 <div class="output-column">
-                    <h2>Final Prompt (English)</h2><p>Hasil terjemahan final.</p><div id="prompt-en" class="readonly-prompt"></div><button type="button" id="copy-en-btn" class="copy-btn">Salin Prompt</button>
+                    <h2>Final Prompt (English)</h2>
+                    <p>Klik tombol 'Terjemahkan' untuk melihat hasilnya di sini.</p>
+                    <div id="prompt-en" class="readonly-prompt"></div>
+                    <button type="button" id="copy-en-btn" class="copy-btn">Salin Prompt EN</button>
                 </div>
-                 <button type="button" id="generate-all-btn">Buat Naskah Lengkap</button>
+
+                <div class="main-action-buttons">
+                     <button type="button" id="translate-btn" class="translate-button">Terjemahkan ke Inggris</button>
+                     <button type="button" id="generate-all-btn">Buat Naskah Lengkap (ID)</button>
+                </div>
             </div>
         </aside>
     </div>
