@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('negatif').value = 'Hindari: teks di layar, subtitle, tulisan di video, font, logo, distorsi, artefak, anomali, wajah ganda, anggota badan cacat, tangan tidak normal, orang tambahan, objek mengganggu, kualitas rendah, buram, glitch, suara robotik, suara pecah.';
     }
     
-    prefillForm();
+   // prefillForm();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
