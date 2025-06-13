@@ -412,3 +412,19 @@ body {
     font-weight: 600;
     color: var(--primary-color);
 }
+/* GAYA UNTUK TOMBOL HAPUS ADEGAN */
+.scene-card .delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 1.5rem;
+    color: var(--label-color);
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.scene-card .delete-btn:hover {
+    color: #ff6b6b; /* Warna merah saat di-hover */
+}
