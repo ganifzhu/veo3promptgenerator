@@ -263,6 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // FUNGSI GENERATE PROMPT & HELPERS
     // =================================================================
+    const delay = ms => new Promise(res => setTimeout(res, ms));
+
     function generateIndonesianPrompt(sceneData, allCharacters) {
         const characterDetails = allCharacters.map(char => `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter||'(...)'}\n- Suara: ${char.suara||'(...)'}\n- Aksi: ${char.aksi||'(...)'}\n- Ekspresi: ${char.ekspresi||'(...)'}\n- Dialog: ${char.dialog||'(...)'}`).join('\n\n');
         return `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetails}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
@@ -270,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function translateSceneToEnglish(sceneData, allCharacters) {
         const t = (text) => translateText(text, 'en', 'id');
-        const delay = ms => new Promise(res => setTimeout(res, ms));
         const sceneDataEn = {};
         const sceneKeys = ['judul', 'latar', 'suasana', 'pencahayaan', 'gayaVisual', 'kualitasVisual', 'suaraLingkungan', 'negatif'];
         for (const key of sceneKeys) {
@@ -284,8 +285,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const translatedCharacters = [];
         for (const char of allCharacters) {
             const charEn = { nama: char.nama, dialog: char.dialog };
-            // KESALAHAN ADA DI SINI, SEHARUSNYA 'deskripsi' BUKAN 'karakter'
-            charEn.deskripsi = await t(char.karakter); await delay(150);
+            // ================== PERBAIKAN FINAL ADA DI SINI ==================
+            charEn.deskripsi = await t(char.karakter); await delay(150); // Nama properti diubah menjadi 'deskripsi'
+            // ===============================================================
             charEn.suara = await t(char.suara); await delay(150);
             charEn.aksi = await t(char.aksi); await delay(150);
             charEn.ekspresi = await t(char.ekspresi); await delay(150);
