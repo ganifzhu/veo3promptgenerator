@@ -428,3 +428,29 @@ body {
 .scene-card .delete-btn:hover {
     color: #ff6b6b; /* Warna merah saat di-hover */
 }
+/* =================================== */
+/* GAYA UNTUK FOOTER BARU             */
+/* =================================== */
+
+.site-footer {
+    width: 100%;
+    padding: 1.5rem;
+    background-color: var(--card-background); /* Warna yang konsisten dengan container utama */
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+    position: fixed; /* Membuat footer menempel di bawah */
+    bottom: 0;
+    left: 0;
+    z-index: 10; /* Memastikan footer di atas konten lain jika ada overlap */
+}
+
+.site-footer p {
+    color: var(--label-color);
+    font-size: 0.9rem;
+}
+
+/* Kita perlu memberi sedikit ruang di body agar konten paling bawah tidak tertutup footer */
+body {
+    padding-bottom: 80px; /* Sesuaikan angka ini jika perlu */
+}
