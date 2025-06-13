@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const MYMEMORY_API_URL = 'https://api.mymemory.translated.net/get';
 
     const LOCAL_STORAGE_KEY = 'veoPromptGeneratorStory';
+    // PENTING: Ganti kunci rahasia ini dengan teks unik Anda sendiri!
+    const SECRET_KEY = 'KunciRahasiaSuperAman_GantiDenganTeksUnikAnda';
 
     // =================================================================
     // STRUKTUR DATA UTAMA (THE STORY)
@@ -26,30 +28,41 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeSceneIndex = -1;
 
     // =================================================================
-    // FUNGSI SIMPAN & MUAT DARI LOCAL STORAGE
+    // FUNGSI SIMPAN & MUAT (DENGAN ENKRIPSI)
     // =================================================================
     function saveStoryToLocalStorage() {
         try {
-            // Selalu simpan data form yang aktif sebelum menyimpan ke local storage
             if (activeSceneIndex > -1) {
                 saveCurrentSceneData();
             }
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(story));
-            console.log("Proyek disimpan ke Local Storage.");
+            const jsonString = JSON.stringify(story);
+            // ENKRIPSI DATA SEBELUM DISIMPAN
+            const encryptedData = CryptoJS.AES.encrypt(jsonString, SECRET_KEY).toString();
+            localStorage.setItem(LOCAL_STORAGE_KEY, encryptedData);
+            console.log("Proyek dienkripsi dan disimpan.");
         } catch (error) {
             console.error("Gagal menyimpan proyek:", error);
         }
     }
 
     function loadStoryFromLocalStorage() {
-        const savedStory = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (savedStory) {
+        const encryptedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (encryptedData) {
             try {
-                story = JSON.parse(savedStory);
+                // DEKRIPSI DATA SETELAH DIMUAT
+                const bytes = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
+                const decryptedJsonString = bytes.toString(CryptoJS.enc.Utf8);
+                
+                if (!decryptedJsonString) {
+                    throw new Error("Gagal mendekripsi data, kemungkinan kunci salah atau data rusak.");
+                }
+
+                story = JSON.parse(decryptedJsonString);
+                console.log("Proyek berhasil didekripsi dan dimuat.");
                 return true;
             } catch (error) {
                 console.error("Gagal memuat data proyek:", error);
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                localStorage.removeItem(LOCAL_STORAGE_KEY); // Hapus data rusak
                 return false;
             }
         }
@@ -59,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // FUNGSI-FUNGSI UTAMA (LEVEL ADEGAN)
     // =================================================================
-
     function renderSceneList() {
         sceneListContainer.innerHTML = '';
         story.scenes.forEach((scene, index) => {
@@ -102,9 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
-        saveStoryToLocalStorage(); // Simpan setiap kali ganti adegan
     }
-    
+
     function deleteScene(index) {
         const sceneNameToDelete = story.scenes[index].title || `Adegan ${index + 1}`;
         if (confirm(`Anda yakin ingin menghapus "${sceneNameToDelete}"?`)) {
@@ -184,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scene.activeCharacterIndex = charIndex;
         loadCharacterData();
         renderCharacterTabs();
-        saveStoryToLocalStorage(); // Simpan setiap kali ganti karakter
     }
 
     function loadCharacterData() {
@@ -249,14 +259,14 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.textContent = 'Membuat Prompt...';
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
-        if (!currentScene) { /*...*/ return; }
+        if (!currentScene) { generateBtn.textContent = 'Buat Prompt untuk Adegan Ini'; generateBtn.disabled = false; return; }
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
         promptIdOutput.value = promptID;
         promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
         generateBtn.textContent = 'Buat Prompt untuk Adegan Ini';
         generateBtn.disabled = false;
     });
-    
+
     generateAllBtn.addEventListener('click', async () => {
         saveCurrentSceneData();
         generateAllBtn.textContent = 'Membuat Naskah...';
@@ -283,8 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         if (loadStoryFromLocalStorage() && story.scenes.length > 0) {
             activeSceneIndex = 0;
-            loadSceneData(activeSceneIndex);
-            renderSceneList();
+            switchScene(0);
         } else {
             addScene();
         }
