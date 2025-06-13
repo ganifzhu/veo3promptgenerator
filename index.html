@@ -34,36 +34,15 @@
                     <div class="form-column">
                         <fieldset class="form-group-fieldset">
                             <legend>4. Detail Visual & Sinematografi</legend>
-                            <div class="form-group">
-                                <label for="kamera">Gerakan Kamera</label>
-                                <select id="kamera">
-                                    <option>Static (Statis)</option>
-                                    <option selected>Tracking Shot (Mengikuti Objek)</option>
-                                    </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="pencahayaan">Pencahayaan</label>
-                                <input type="text" id="pencahayaan" placeholder="Contoh: natural dari lampu jalan...">
-                            </div>
-                            <div class="form-group">
-                                <label for="gaya-visual">Gaya Video / Art Style</label>
-                                <input type="text" id="gaya-visual" value="cinematic realistis">
-                            </div>
-                            <div class="form-group">
-                                <label for="kualitas-visual">Kualitas Visual</label>
-                                <input type="text" id="kualitas-visual" value="Resolusi 4K">
-                            </div>
+                            <div class="form-group"><label for="kamera">Gerakan Kamera</label><select id="kamera"><option>Static (Statis)</option><option selected>Tracking Shot (Mengikuti Objek)</option><option>Pan Left (Geser Kiri)</option><option>Pan Right (Geser Kanan)</option></select></div>
+                            <div class="form-group"><label for="pencahayaan">Pencahayaan</label><input type="text" id="pencahayaan" placeholder="Contoh: natural dari lampu jalan..."></div>
+                            <div class="form-group"><label for="gaya-visual">Gaya Video / Art Style</label><input type="text" id="gaya-visual" value="cinematic realistis"></div>
+                            <div class="form-group"><label for="kualitas-visual">Kualitas Visual</label><input type="text" id="kualitas-visual" value="Resolusi 4K"></div>
                         </fieldset>
                     </div>
                     <div class="form-column">
-                        <div class="form-group">
-                            <label for="suara-lingkungan">5. Suara Lingkungan / Ambience</label>
-                            <textarea id="suara-lingkungan" rows="3" placeholder="Contoh: SOUND: suara mesin bus menyala..."></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="negatif">6. Negative Prompt</label>
-                            <textarea id="negatif" rows="4" placeholder="Contoh: teks, logo, subtitle..."></textarea>
-                        </div>
+                        <div class="form-group"><label for="suara-lingkungan">5. Suara Lingkungan / Ambience</label><textarea id="suara-lingkungan" rows="3" placeholder="Contoh: SOUND: suara mesin bus menyala..."></textarea></div>
+                        <div class="form-group"><label for="negatif">6. Negative Prompt</label><textarea id="negatif" rows="4" placeholder="Contoh: teks, logo, subtitle..."></textarea></div>
                     </div>
                 </div>
             </fieldset>
@@ -71,41 +50,21 @@
             <fieldset class="section-fieldset">
                 <legend>Detail Karakter dalam Adegan</legend>
                 <div class="character-manager">
-                    <div id="character-tabs">
-                        </div>
+                    <div id="character-tabs"></div>
                     <button type="button" id="add-character-btn">+ Tambah Karakter</button>
                 </div>
-                
                 <div class="form-grid">
                     <div class="form-column">
-                        <div class="form-group">
-                            <label for="nama">Nama Karakter (untuk Tab)</label>
-                            <input type="text" id="nama" placeholder="Contoh: Anya, Budi, dll.">
-                        </div>
-                        <div class="form-group">
-                            <label for="karakter">Deskripsi Karakter Inti</label>
-                            <textarea id="karakter" rows="6" placeholder="Deskripsi fisik, pakaian, dll. yang relevan..."></textarea>
-                        </div>
-                         <div class="form-group">
-                            <label for="suara">Detail Suara Karakter</label>
-                            <textarea id="suara" rows="4" placeholder="Nada, timbre, aksen..."></textarea>
-                        </div>
+                        <div class="form-group"><label for="nama">Nama Karakter (untuk Tab)</label><input type="text" id="nama" placeholder="Contoh: Anya, Budi, dll."></div>
+                        <div class="form-group"><label for="karakter">Deskripsi Karakter Inti</label><textarea id="karakter" rows="6" placeholder="Deskripsi fisik, pakaian, dll. yang relevan..."></textarea></div>
+                         <div class="form-group"><label for="suara">Detail Suara Karakter</label><textarea id="suara" rows="4" placeholder="Nada, timbre, aksen..."></textarea></div>
                     </div>
                     <div class="form-column">
-                        <div class="form-group">
-                            <label for="aksi">Aksi Spesifik Karakter</label>
-                            <textarea id="aksi" rows="5" placeholder="Apa yang dilakukan karakter ini di adegan?"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="ekspresi">Ekspresi Karakter</label>
-                            <textarea id="ekspresi" rows="3" placeholder="Bagaimana ekspresi wajah dan bahasa tubuhnya?"></textarea>
-                        </div>
+                        <div class="form-group"><label for="aksi">Aksi Spesifik Karakter</label><textarea id="aksi" rows="5" placeholder="Apa yang dilakukan karakter ini di adegan?"></textarea></div>
+                        <div class="form-group"><label for="ekspresi">Ekspresi Karakter</label><textarea id="ekspresi" rows="3" placeholder="Bagaimana ekspresi wajah dan bahasa tubuhnya?"></textarea></div>
                     </div>
                     <div class="form-column">
-                        <div class="form-group">
-                            <label for="dialog">Dialog Karakter</label>
-                            <textarea id="dialog" rows="8" placeholder="Tulis dialog spesifik untuk karakter ini..."></textarea>
-                        </div>
+                        <div class="form-group"><label for="dialog">Dialog Karakter</label><textarea id="dialog" rows="8" placeholder="Tulis dialog spesifik untuk karakter ini..."></textarea></div>
                     </div>
                 </div>
             </fieldset>
@@ -114,7 +73,19 @@
         </form>
 
         <div class="output-area">
+            <div class="output-column">
+                <h2>Prompt (Bahasa Indonesia)</h2>
+                <p>Anda bisa menyunting hasil prompt di kolom ini sebelum digunakan.</p>
+                <textarea id="prompt-id" rows="20"></textarea>
+                 <button type="button" id="copy-id-btn" class="copy-btn">Salin Prompt</button>
             </div>
+            <div class="output-column">
+                <h2>Final Prompt (English)</h2>
+                <p>Hasil terjemahan final (dialog tetap dalam Bahasa Indonesia).</p>
+                <div id="prompt-en" class="readonly-prompt"></div>
+                 <button type="button" id="copy-en-btn" class="copy-btn">Salin Prompt</button>
+            </div>
+        </div>
     </div>
     <script src="js/script.js"></script>
 </body>
