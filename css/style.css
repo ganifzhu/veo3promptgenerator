@@ -283,3 +283,132 @@ button[type="submit"]:hover, .copy-btn:hover {
 .tab-btn.active:hover .delete-btn {
     background-color: rgba(255, 255, 255, 0.2);
 }
+/* =================================== */
+/* GAYA UNTUK LAYOUT STORYBOARD BARU */
+/* =================================== */
+body {
+    padding: 0;
+    display: flex;
+    min-height: 100vh;
+}
+
+.story-container {
+    display: grid;
+    grid-template-columns: 300px 1.5fr 1fr; /* Kolom: Storyboard, Editor, Output */
+    width: 100%;
+    height: 100vh;
+    gap: 1px;
+    background-color: var(--border-color);
+    
+    /* Menghapus style .container lama */
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+#storyboard-panel, #editor-panel, #output-panel {
+    background-color: var(--background-color);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#editor-panel {
+    background-color: var(--card-background);
+}
+
+.storyboard-header {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+#scene-list {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.scene-card {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-background);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+
+.scene-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.scene-card.active {
+    border-color: var(--primary-color);
+    background-color: #eaf2fc;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.15);
+}
+
+.scene-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.scene-card p {
+    font-size: 0.85rem;
+    color: var(--label-color);
+}
+
+.storyboard-footer {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.add-scene-button, #generate-all-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-scene-button:hover, #generate-all-btn:hover {
+    background-color: var(--hover-color);
+}
+
+#generate-all-btn {
+    margin-top: 1.5rem;
+    background-color: var(--secondary-color);
+}
+#generate-all-btn:hover {
+     background-color: #45d1b5;
+}
+
+/* Penyesuaian untuk .container lama */
+.editor-container, .output-container {
+    width: 100%;
+    max-width: 100%;
+}
+
+.section-fieldset {
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.section-fieldset legend {
+    padding: 0 0.75rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
