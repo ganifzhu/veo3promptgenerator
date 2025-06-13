@@ -7,84 +7,40 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
     <div class="story-container">
         <aside id="storyboard-panel">
-            <div class="storyboard-header"><h2>Daftar Adegan</h2></div>
-            <div id="scene-list"></div>
+            <div class="storyboard-header">
+                <h2>Daftar Adegan</h2>
+            </div>
+            <div id="scene-list">
+                </div>
             <div class="storyboard-footer">
-    <button type="button" id="add-scene-btn" class="add-scene-button">
-        + Tambah Adegan Baru
-    </button>
-
-    <footer class="site-footer">
-        <p>Dibuat oleh Ganif Susanto &copy; 2025</p>
-    </footer>
-</div>
+                <button type="button" id="add-scene-btn" class="add-scene-button">
+                    + Tambah Adegan Baru
+                </button>
+                <footer class="site-footer">
+                    <p>Dibuat oleh Ganif Susanto &copy; 2025</p>
+                </footer>
+            </div>
         </aside>
 
         <main id="editor-panel">
             <div class="editor-container">
-                 <header><h1>Veo 3 Prompt Editor</h1><p>Isi detail adegan dan karakter yang sedang aktif.</p></header>
+                 <header>
+                    <h1>Veo 3 Prompt Editor</h1>
+                    <p>Isi detail adegan dan karakter yang sedang aktif.</p>
+                </header>
                 <form id="prompt-form">
-                    <fieldset class="section-fieldset">
-                        <legend>Informasi Adegan</legend>
-                        <div class="form-grid">
-                            <div class="form-column">
-                                <div class="form-group"><label for="judul">Judul Adegan</label><input type="text" id="judul" placeholder="Contoh: Pertemuan di Terminal Senja"></div>
-                                <div class="form-group"><label for="latar">Latar Tempat & Waktu</label><textarea id="latar" rows="4" placeholder="Contoh: Di terminal bus antar kota malam hari..."></textarea></div>
-                                <div class="form-group"><label for="suasana">Suasana Keseluruhan</label><textarea id="suasana" rows="3" placeholder="Contoh: Suasana sibuk, ramai..."></textarea></div>
-                            </div>
-                            <div class="form-column">
-                                <fieldset class="form-group-fieldset">
-                                    <legend>Detail Visual & Sinematografi</legend>
-                                    <div class="form-group"><label for="kamera">Gerakan Kamera</label><select id="kamera"><option>Static (Statis)</option><option>Pan Left (Geser Kiri)</option><option>Pan Right (Geser Kanan)</option><option>Tilt Up (Mendongak ke Atas)</option><option>Tilt Down (Menunduk ke Bawah)</option><option>Dolly In (Mendekat)</option><option>Dolly Out (Menjauh)</option><option>Truck Left (Geser ke Kiri)</option><option>Truck Right (Geser ke Kanan)</option><option>Zoom In (Perbesar)</option><option>Zoom Out (Perkecil)</option><option>Crane Up (Kamera Naik)</option><option>Crane Down (Kamera Turun)</option><option selected>Tracking Shot (Mengikuti Objek)</option><option>Handheld (Genggam Tangan)</option><option>Drone Shot (Tembakan Drone)</option><option>Vertigo/Dolly Zoom (Efek Vertigo)</option><option>3D Rotation (Rotasi 3D)</option><option>Clockwise Rotation (Rotasi Searah Jarum Jam)</option><option>Counter-Clockwise Rotation (Rotasi Berlawanan Jarum Jam)</option><option>Arc Shot (Gerakan Melengkung)</option><option>Whip Pan (Geser Cepat)</option></select></div>
-                                    <div class="form-group"><label for="pencahayaan">Pencahayaan</label><input type="text" id="pencahayaan" placeholder="Contoh: natural dari lampu jalan..."></div>
-                                    <div class="form-group"><label for="gaya-visual">Gaya Video</label><input type="text" id="gaya-visual" placeholder="Contoh: cinematic realistis"></div>
-                                    <div class="form-group"><label for="kualitas-visual">Kualitas Visual</label><input type="text" id="kualitas-visual" placeholder="Contoh: Resolusi 4K"></div>
-                                </fieldset>
-                            </div>
-                            <div class="form-column">
-                                <div class="form-group"><label for="suara-lingkungan">Suara Lingkungan</label><textarea id="suara-lingkungan" rows="3" placeholder="Contoh: SOUND: suara mesin bus..."></textarea></div>
-                                <div class="form-group"><label for="negatif">Negative Prompt</label><textarea id="negatif" rows="4" placeholder="Contoh: teks, logo..."></textarea></div>
-                            </div>
-                        </div>
-                    </fieldset>
-                    <fieldset class="section-fieldset">
-                        <legend>Detail Karakter dalam Adegan</legend>
-                        <div class="character-manager"><div id="character-tabs"></div><button type="button" id="add-character-btn">+ Tambah Karakter</button></div>
-                        <div class="form-grid">
-                            <div class="form-column">
-                                <div class="form-group"><label for="nama">Nama Karakter</label><input type="text" id="nama" placeholder="Contoh: Anya, Budi..."></div>
-                                <div class="form-group"><label for="karakter">Deskripsi Karakter</label><textarea id="karakter" rows="6" placeholder="Deskripsi fisik, pakaian..."></textarea></div>
-                                <div class="form-group"><label for="suara">Detail Suara</label><textarea id="suara" rows="4" placeholder="Nada, timbre, aksen..."></textarea></div>
-                            </div>
-                            <div class="form-column">
-                                <div class="form-group"><label for="aksi">Aksi Spesifik</label><textarea id="aksi" rows="5" placeholder="Apa yang dilakukan karakter ini?"></textarea></div>
-                                <div class="form-group"><label for="ekspresi">Ekspresi</label><textarea id="ekspresi" rows="3" placeholder="Bagaimana ekspresinya?"></textarea></div>
-                            </div>
-                            <div class="form-column">
-                                <div class="form-group"><label for="dialog">Dialog</label><textarea id="dialog" rows="8" placeholder="Tulis dialog spesifik..."></textarea></div>
-                            </div>
-                        </div>
-                    </fieldset>
-                    <button type="submit" id="generate-btn">Buat Prompt untuk Adegan Ini</button>
-                </form>
+                    </form>
             </div>
         </main>
 
         <aside id="output-panel">
             <div class="output-container">
-                <div class="output-column">
-                    <h2>Prompt (Bahasa Indonesia)</h2><p>Anda bisa menyunting hasil prompt di kolom ini.</p><textarea id="prompt-id" rows="20"></textarea><button type="button" id="copy-id-btn" class="copy-btn">Salin Prompt</button>
                 </div>
-                <div class="output-column">
-                    <h2>Final Prompt (English)</h2><p>Hasil terjemahan final.</p><div id="prompt-en" class="readonly-prompt"></div><button type="button" id="copy-en-btn" class="copy-btn">Salin Prompt</button>
-                </div>
-                 <button type="button" id="generate-all-btn">Buat Naskah Lengkap</button>
-            </div>
         </aside>
     </div>
-   </div>
     <script src="js/script.js"></script>
 </body>
 </html>
