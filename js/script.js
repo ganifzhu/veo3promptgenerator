@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // DEKLARASI ELEMEN HTML
+    // DEKLARASI ELEMEN & KONSTANTA
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
@@ -34,7 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeSceneIndex > -1) {
                 saveCurrentSceneData();
             }
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(story));
+            const jsonString = JSON.stringify(story);
+            const encryptedData = CryptoJS.AES.encrypt(jsonString, SECRET_KEY).toString();
+            localStorage.setItem(LOCAL_STORAGE_KEY, encryptedData);
             console.log("Proyek disimpan ke Local Storage.");
         } catch (error) {
             console.error("Gagal menyimpan proyek:", error);
@@ -64,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // FUNGSI-FUNGSI UTAMA (LEVEL ADEGAN)
     // =================================================================
-
     function renderSceneList() {
         sceneListContainer.innerHTML = '';
         story.scenes.forEach((scene, index) => {
@@ -107,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
-        saveStoryToLocalStorage(); // MEMASTIKAN PENYIMPANAN SETELAH SWITCH
     }
     
     function deleteScene(index) {
@@ -189,7 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scene.activeCharacterIndex = charIndex;
         loadCharacterData();
         renderCharacterTabs();
-        saveStoryToLocalStorage(); // MEMASTIKAN PENYIMPANAN SETELAH SWITCH
     }
 
     function loadCharacterData() {
@@ -251,10 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveCurrentSceneData();
-        generateBtn.textContent = 'Membuat Prompt...';
+        generateBtn.textContent = 'Menerjemahkan...';
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
-        if (!currentScene) { generateBtn.textContent = 'Buat Prompt untuk Adegan Ini'; generateBtn.disabled = false; return; }
+        if (!currentScene) { /*...*/ return; }
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
         promptIdOutput.value = promptID;
         promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
@@ -264,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     generateAllBtn.addEventListener('click', async () => {
         saveCurrentSceneData();
-        generateAllBtn.textContent = 'Membuat Naskah...';
+        generateAllBtn.textContent = 'Menerjemahkan Naskah...';
         generateAllBtn.disabled = true;
         try {
             let fullScriptID = `PROYEK: Naskah Lengkap\n====================\n\n`;
@@ -288,8 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         if (loadStoryFromLocalStorage() && story.scenes.length > 0) {
             activeSceneIndex = 0;
-            loadSceneData(activeSceneIndex);
-            renderSceneList();
+            switchScene(0);
         } else {
             addScene();
         }
@@ -297,25 +295,59 @@ document.addEventListener('DOMContentLoaded', () => {
     initialize();
 
     // =================================================================
-    // FUNGSI GENERATE PROMPT & HELPERS
+    // FUNGSI GENERATE PROMPT & HELPERS (DENGAN LOGIKA TRANSLATE BARU)
     // =================================================================
     async function generatePrompts(sceneData, allCharacters) {
-        if (!sceneData || !allCharacters || allCharacters.length === 0) return { promptID: "", promptEN: "" };
-        const characterDetails = allCharacters.map(char => {
-            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(tidak ada deskripsi)'}\n- Suara: ${char.suara || '(tidak ada detail suara)'}\n- Aksi: ${char.aksi || '(tidak ada aksi)'}\n- Ekspresi: ${char.ekspresi || '(tidak ada ekspresi)'}\n- Dialog: ${char.dialog || '(tidak ada dialog)'}`;
+        // --- PROMPT BAHASA INDONESIA (TETAP SAMA) ---
+        const characterDetailsID = allCharacters.map(char => {
+            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(...)'}\n- Suara: ${char.suara || '(...)'}\n- Aksi: ${char.aksi || '(...)'}\n- Ekspresi: ${char.ekspresi || '(...)'}\n- Dialog: ${char.dialog || '(...)'}`;
         }).join('\n\n');
-        const promptID = `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetails}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
-        const t = (text) => translateText(text, 'en', 'id');
-        const [judulEn, latarEn, suasanaEn, pencahayaanEn, gayaVisualEn, kualitasVisualEn, suaraLingkunganEn, negatifEn] = await Promise.all([t(sceneData.judul), t(sceneData.latar), t(sceneData.suasana), t(sceneData.pencahayaan), t(sceneData.gayaVisual), t(sceneData.kualitasVisual), t(sceneData.suaraLingkungan.replace('SOUND:', '')), t(sceneData.negatif.replace('Hindari:', ''))]);
-        const cameraMovementEn = sceneData.kamera.match(/\(([^)]+)\)/) ? sceneData.kamera.match(/\(([^)]+)\)/)[1] : sceneData.kamera;
-        const translatedCharacters = await Promise.all(allCharacters.map(async (char) => {
-            const [karakterEn, suaraEn, aksiEn, ekspresiEn] = await Promise.all([t(char.karakter), t(char.suara), t(char.aksi), t(char.ekspresi)]);
+        const promptID = `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetailsID}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
+
+        // --- PROMPT BAHASA INGGRIS (LOGIKA BARU YANG EFISIEN) ---
+        const separator = '|||---|||';
+        let textsToTranslate = [];
+        
+        // Kumpulkan semua teks yang perlu diterjemahkan
+        textsToTranslate.push(sceneData.judul, sceneData.latar, sceneData.suasana, sceneData.pencahayaan, sceneData.gayaVisual, sceneData.kualitasVisual, sceneData.suaraLingkungan.replace('SOUND:', ''), sceneData.negatif.replace('Hindari:', ''));
+        allCharacters.forEach(char => {
+            textsToTranslate.push(char.karakter, char.suara, char.aksi, char.ekspresi);
+        });
+
+        // Gabungkan menjadi satu string besar
+        const combinedText = textsToTranslate.join(separator);
+
+        // Lakukan satu kali panggilan API
+        const translatedCombinedText = await translateText(combinedText, 'en', 'id');
+        const translatedSnippets = translatedCombinedText.split(separator.trim()); // .trim() untuk jaga-jaga
+
+        // Bongkar kembali hasil terjemahan
+        let currentIndex = 0;
+        const judulEn = translatedSnippets[currentIndex++];
+        const latarEn = translatedSnippets[currentIndex++];
+        const suasanaEn = translatedSnippets[currentIndex++];
+        const pencahayaanEn = translatedSnippets[currentIndex++];
+        const gayaVisualEn = translatedSnippets[currentIndex++];
+        const kualitasVisualEn = translatedSnippets[currentIndex++];
+        const suaraLingkunganEn = translatedSnippets[currentIndex++];
+        const negatifEn = translatedSnippets[currentIndex++];
+
+        const translatedCharacters = allCharacters.map(char => {
+            const karakterEn = translatedSnippets[currentIndex++];
+            const suaraEn = translatedSnippets[currentIndex++];
+            const aksiEn = translatedSnippets[currentIndex++];
+            const ekspresiEn = translatedSnippets[currentIndex++];
             return { nama: char.nama, deskripsi: karakterEn, suara: suaraEn, aksi: aksiEn, ekspresi: ekspresiEn, dialog: char.dialog };
-        }));
+        });
+
+        const cameraMovementEn = sceneData.kamera.match(/\(([^)]+)\)/) ? sceneData.kamera.match(/\(([^)]+)\)/)[1] : sceneData.kamera;
+
         const characterDetailsEN = translatedCharacters.map(char => {
-            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(no description)'}\n- Voice: ${char.suara || '(no voice details)'}\n- Action: ${char.aksi || '(no action)'}\n- Expression: ${char.ekspresi || '(no expression)'}\n- Dialogue: ${extractDialog(char.dialog) || '(no dialogue)'}`;
+            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(...)'}\n- Voice: ${char.suara || '(...)'}\n- Action: ${char.aksi || '(...)'}\n- Expression: ${char.ekspresi || '(...)'}\n- Dialogue: ${extractDialog(char.dialog) || '(...)'}`;
         }).join('\n\n');
+
         const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
+        
         return { promptID, promptEN };
     }
     
