@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // DEKLARASI ELEMEN & KONSTANTA
+    // DEKLARASI ELEMEN HTML
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const characterTabsContainer = document.getElementById('character-tabs');
     const MYMEMORY_API_URL = 'https://api.mymemory.translated.net/get';
 
-    const LOCAL_STORAGE_KEY = 'veoPromptGeneratorStory'; // Kunci untuk penyimpanan
+    const LOCAL_STORAGE_KEY = 'veoPromptGeneratorStory';
 
     // =================================================================
     // STRUKTUR DATA UTAMA (THE STORY)
@@ -30,7 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     function saveStoryToLocalStorage() {
         try {
+            if (activeSceneIndex > -1) {
+                saveCurrentSceneData();
+            }
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(story));
+            console.log("Proyek disimpan ke Local Storage.");
         } catch (error) {
             console.error("Gagal menyimpan proyek:", error);
         }
@@ -44,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return true;
             } catch (error) {
                 console.error("Gagal memuat data proyek:", error);
-                localStorage.removeItem(LOCAL_STORAGE_KEY); // Hapus data rusak
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
                 return false;
             }
         }
@@ -78,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addScene() {
-        if (activeSceneIndex > -1) saveCurrentSceneData();
+        saveCurrentSceneData();
         const newScene = {
             title: `Adegan ${story.scenes.length + 1}`,
             sceneData: {
@@ -93,11 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function switchScene(index) {
-        if (activeSceneIndex > -1) saveCurrentSceneData();
+        saveCurrentSceneData();
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
-        saveStoryToLocalStorage(); // SIMPAN SETIAP GANTI ADEGAN
     }
 
     function deleteScene(index) {
@@ -107,13 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeSceneIndex >= index) {
                 activeSceneIndex = Math.max(0, activeSceneIndex - 1);
             }
-            renderSceneList();
             if (story.scenes.length === 0) {
                 addScene();
             } else {
-                loadSceneData(activeSceneIndex);
+                switchScene(activeSceneIndex);
             }
-            saveStoryToLocalStorage(); // SIMPAN SETELAH HAPUS ADEGAN
         }
     }
 
@@ -181,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
         scene.activeCharacterIndex = charIndex;
         loadCharacterData();
         renderCharacterTabs();
-        saveStoryToLocalStorage(); // SIMPAN SETIAP GANTI KARAKTER
     }
 
     function loadCharacterData() {
@@ -224,11 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 scene.activeCharacterIndex = Math.max(0, scene.activeCharacterIndex - 1);
             }
             if (scene.characters.length === 0) {
-                 addCharacter();
+                addCharacter();
             } else {
-                 switchCharacter(scene.activeCharacterIndex);
+                switchCharacter(scene.activeCharacterIndex);
             }
-            saveStoryToLocalStorage(); // SIMPAN SETELAH HAPUS KARAKTER
         }
     }
 
@@ -238,10 +237,14 @@ document.addEventListener('DOMContentLoaded', () => {
     addSceneBtn.addEventListener('click', addScene);
     addCharacterBtn.addEventListener('click', addCharacter);
 
+    // Pemicu untuk menyimpan data secara berkala setiap kali ada ketikan
+    form.addEventListener('input', saveStoryToLocalStorage); 
+    // Jaring pengaman terakhir sebelum menutup tab
+    window.addEventListener('beforeunload', saveStoryToLocalStorage);
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveCurrentSceneData();
-        saveStoryToLocalStorage(); // SIMPAN SEBELUM GENERATE
         generateBtn.textContent = 'Membuat Prompt...';
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
@@ -255,23 +258,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     generateAllBtn.addEventListener('click', async () => {
         saveCurrentSceneData();
-        saveStoryToLocalStorage(); // SIMPAN SEBELUM GENERATE SEMUA
         generateAllBtn.textContent = 'Membuat Naskah...';
         generateAllBtn.disabled = true;
         try {
             let fullScriptID = `PROYEK: Naskah Lengkap\n====================\n\n`;
             let fullScriptEN = `PROJECT: Full Script\n====================\n\n`;
-            for (let i = 0; i < story.scenes.length; i++) {
-                const scene = story.scenes[i];
+            for (const scene of story.scenes) {
                 const { promptID, promptEN } = await generatePrompts(scene.sceneData, scene.characters);
-                fullScriptID += `--- ADEGAN ${i + 1}: ${scene.title} ---\n\n${promptID}\n\n\n`;
-                fullScriptEN += `--- SCENE ${i + 1}: ${scene.title} ---\n\n${promptEN}\n\n\n`;
+                fullScriptID += `--- ADEGAN: ${scene.title} ---\n\n${promptID}\n\n\n`;
+                fullScriptEN += `--- SCENE: ${scene.title} ---\n\n${promptEN}\n\n\n`;
             }
             promptIdOutput.value = fullScriptID;
             promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
         } catch (error) {
-            console.error("Terjadi error saat membuat naskah lengkap:", error);
-            alert("Gagal membuat naskah lengkap. Silakan coba lagi atau periksa console untuk detail error.");
+            console.error("Error saat membuat naskah lengkap:", error);
+            alert("Gagal membuat naskah lengkap.");
         } finally {
             generateAllBtn.textContent = 'Buat Naskah Lengkap';
             generateAllBtn.disabled = false;
@@ -281,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         if (loadStoryFromLocalStorage() && story.scenes.length > 0) {
             activeSceneIndex = 0;
-            switchScene(activeSceneIndex);
+            switchScene(0);
         } else {
             addScene();
         }
