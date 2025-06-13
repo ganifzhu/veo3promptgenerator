@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // DEKLARASI ELEMEN & KONSTANTA
+    // DEKLARASI ELEMEN HTML
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
     const generateAllBtn = document.getElementById('generate-all-btn');
+    const translateBtn = document.getElementById('translate-btn'); // <-- INI BARIS YANG HILANG SEBELUMNYA
     const promptIdOutput = document.getElementById('prompt-id');
     const promptEnOutput = document.getElementById('prompt-en');
     const copyIdBtn = document.getElementById('copy-id-btn');
@@ -235,15 +236,22 @@ document.addEventListener('DOMContentLoaded', () => {
         translateBtn.textContent = 'Menerjemahkan...';
         translateBtn.disabled = true;
         try {
+            // Cek apakah ada naskah ID untuk diterjemahkan
+            if (promptIdOutput.value.trim() === '') {
+                alert('Buat prompt Bahasa Indonesia terlebih dahulu sebelum menerjemahkan.');
+                return;
+            }
+            // Menerjemahkan seluruh naskah yang ada di output
             let fullScriptEN = `PROJECT: Full Script\n====================\n\n`;
             for (const [index, scene] of story.scenes.entries()) {
                 const promptEN = await translateSceneToEnglish(scene.sceneData, scene.characters);
                 fullScriptEN += `--- SCENE ${index + 1}: ${scene.title} ---\n\n${promptEN}\n\n\n`;
             }
             promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
+
         } catch (error) {
             console.error("Error saat menerjemahkan:", error);
-            alert("Gagal menerjemahkan. Coba lagi sesaat.");
+            alert("Gagal menerjemahkan. Coba lagi sesaat atau periksa console.");
         } finally {
             translateBtn.textContent = 'Terjemahkan ke Inggris';
             translateBtn.disabled = false;
@@ -285,9 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const translatedCharacters = [];
         for (const char of allCharacters) {
             const charEn = { nama: char.nama, dialog: char.dialog };
-            // ================== PERBAIKAN FINAL ADA DI SINI ==================
-            charEn.deskripsi = await t(char.karakter); await delay(150); // Nama properti diubah menjadi 'deskripsi'
-            // ===============================================================
+            charEn.deskripsi = await t(char.karakter); await delay(150);
             charEn.suara = await t(char.suara); await delay(150);
             charEn.aksi = await t(char.aksi); await delay(150);
             charEn.ekspresi = await t(char.ekspresi); await delay(150);
