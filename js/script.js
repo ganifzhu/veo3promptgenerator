@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addScene() {
-        if (activeSceneIndex !== -1) saveCurrentSceneData();
+        if (activeSceneIndex > -1) saveCurrentSceneData();
         const newScene = {
             title: `Adegan ${story.scenes.length + 1}`,
             sceneData: {
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function switchScene(index) {
-        if (activeSceneIndex !== -1) saveCurrentSceneData();
+        if (activeSceneIndex > -1) saveCurrentSceneData();
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
@@ -191,32 +191,25 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.disabled = false;
     });
 
-    // PERBAIKAN DI SINI: Menambahkan try...catch untuk menangani error
     generateAllBtn.addEventListener('click', async () => {
         saveCurrentSceneData();
         generateAllBtn.textContent = 'Membuat Naskah...';
         generateAllBtn.disabled = true;
-
         try {
             let fullScriptID = `PROYEK: ${story.projectTitle || 'Naskah Lengkap'}\n====================\n\n`;
             let fullScriptEN = `PROJECT: ${story.projectTitle || 'Full Script'}\n====================\n\n`;
-
             for (let i = 0; i < story.scenes.length; i++) {
                 const scene = story.scenes[i];
-                // Menunggu setiap prompt selesai sebelum lanjut ke berikutnya
                 const { promptID, promptEN } = await generatePrompts(scene.sceneData, scene.characters);
                 fullScriptID += `--- ADEGAN ${i + 1}: ${scene.title} ---\n\n${promptID}\n\n\n`;
                 fullScriptEN += `--- SCENE ${i + 1}: ${scene.title} ---\n\n${promptEN}\n\n\n`;
             }
-
             promptIdOutput.value = fullScriptID;
             promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
-
         } catch (error) {
             console.error("Terjadi error saat membuat naskah lengkap:", error);
             alert("Gagal membuat naskah lengkap. Silakan coba lagi atau periksa console untuk detail error.");
         } finally {
-            // Bagian ini akan selalu berjalan, baik sukses maupun error
             generateAllBtn.textContent = 'Buat Naskah Lengkap';
             generateAllBtn.disabled = false;
         }
@@ -235,11 +228,58 @@ document.addEventListener('DOMContentLoaded', () => {
     // FUNGSI GENERATE PROMPT & HELPERS
     // =================================================================
     async function generatePrompts(sceneData, allCharacters) {
-        // ... (Fungsi ini tidak berubah) ...
+        if (allCharacters.length === 0) return { promptID: "...", promptEN: "..." };
+        const characterDetails = allCharacters.map(char => {
+            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(tidak ada deskripsi)'}\n- Suara: ${char.suara || '(tidak ada detail suara)'}\n- Aksi: ${char.aksi || '(tidak ada aksi)'}\n- Ekspresi: ${char.ekspresi || '(tidak ada ekspresi)'}\n- Dialog: ${char.dialog || '(tidak ada dialog)'}`;
+        }).join('\n\n');
+        const promptID = `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetails}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
+        const t = (text) => translateText(text, 'en', 'id');
+        const [judulEn, latarEn, suasanaEn, pencahayaanEn, gayaVisualEn, kualitasVisualEn, suaraLingkunganEn, negatifEn] = await Promise.all([t(sceneData.judul), t(sceneData.latar), t(sceneData.suasana), t(sceneData.pencahayaan), t(sceneData.gayaVisual), t(sceneData.kualitasVisual), t(sceneData.suaraLingkungan.replace('SOUND:', '')), t(sceneData.negatif.replace('Hindari:', ''))]);
+        const cameraMovementEn = sceneData.kamera.match(/\(([^)]+)\)/) ? sceneData.kamera.match(/\(([^)]+)\)/)[1] : sceneData.kamera;
+        const translatedCharacters = await Promise.all(allCharacters.map(async (char) => {
+            const [karakterEn, suaraEn, aksiEn, ekspresiEn] = await Promise.all([t(char.karakter), t(char.suara), t(char.aksi), t(char.ekspresi)]);
+            return { nama: char.nama, deskripsi: karakterEn, suara: suaraEn, aksi: aksiEn, ekspresi: ekspresiEn, dialog: char.dialog };
+        }));
+        const characterDetailsEN = translatedCharacters.map(char => {
+            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(no description)'}\n- Voice: ${char.suara || '(no voice details)'}\n- Action: ${char.aksi || '(no action)'}\n- Expression: ${char.ekspresi || '(no expression)'}\n- Dialogue: ${extractDialog(char.dialog) || '(no dialogue)'}`;
+        }).join('\n\n');
+        const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
+        return { promptID, promptEN };
     }
     
-    // ... (Fungsi-fungsi helper lainnya juga tidak berubah) ...
+    function extractDialog(dialogInput) {
+        if (!dialogInput) return '';
+        const match = dialogInput.match(/"(.*?)"/);
+        return match ? `DIALOG in Indonesian: Character says: "${match[1]}"` : dialogInput;
+    }
+
+    async function translateText(text, targetLang = 'en', sourceLang = 'id') {
+        if (!text || text.trim() === '') return "";
+        const url = `${MYMEMORY_API_URL}?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            const result = await response.json();
+            if (result.responseStatus !== 200) throw new Error(`MyMemory API error: ${result.responseDetails}`);
+            return result.responseData.translatedText;
+        } catch (error) {
+            console.error('Translation failed:', error);
+            return `[Translation Error]`;
+        }
+    }
     
+    function setupCopyButton(button, sourceElement) {
+        if (!button || !sourceElement) return;
+        button.addEventListener('click', () => {
+            const textToCopy = sourceElement.isContentEditable || sourceElement.tagName === 'TEXTAREA' || sourceElement.tagName === 'INPUT' ? sourceElement.value : sourceElement.innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Disalin!';
+                setTimeout(() => { button.textContent = originalText; }, 2000);
+            }).catch(err => { console.error('Failed to copy text: ', err); });
+        });
+    }
+
     setupCopyButton(copyIdBtn, promptIdOutput);
     setupCopyButton(copyEnBtn, promptEnOutput);
 });
