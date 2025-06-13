@@ -19,21 +19,15 @@
     padding: 0;
 }
 
+/* ATURAN BODY YANG DIPERBARUI */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
-    padding: 2rem;
-}
-
-.container {
-    max-width: 1600px;
-    margin: 0 auto;
-    background-color: var(--card-background);
-    padding: 2.5rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px var(--shadow-color);
+    /* Menghapus padding lama */
+    padding: 0; 
+    display: flex;
+    min-height: 100vh;
 }
 
 header {
@@ -67,13 +61,13 @@ header p {
     gap: 2.5rem;
 }
 
-.form-column {
+.form-column, .output-column {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.form-group {
+.form-group, .form-group-fieldset {
     display: flex;
     flex-direction: column;
 }
@@ -82,8 +76,6 @@ header p {
     border: 1px solid var(--border-color);
     padding: 1.5rem;
     border-radius: 8px;
-    display: flex;
-    flex-direction: column;
     gap: 1.5rem;
 }
 
@@ -100,9 +92,7 @@ label {
     color: var(--label-color);
 }
 
-input[type="text"],
-textarea,
-select {
+input[type="text"], textarea, select {
     width: 100%;
     padding: 0.8rem 1rem;
     border: 1px solid var(--border-color);
@@ -113,9 +103,7 @@ select {
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-input[type="text"]:focus,
-textarea:focus,
-select:focus {
+input[type="text"]:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
@@ -148,7 +136,7 @@ button[type="submit"]:hover, .copy-btn:hover {
 .output-area {
     margin-top: 3rem;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 2.5rem;
     border-top: 1px solid var(--border-color);
     padding-top: 2.5rem;
@@ -165,14 +153,13 @@ button[type="submit"]:hover, .copy-btn:hover {
     margin-bottom: 1rem;
 }
 
-
 #prompt-id {
     height: 300px;
 }
 
 .readonly-prompt {
     width: 100%;
-    height: 300px;
+    min-height: 300px;
     padding: 1rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -195,128 +182,27 @@ button[type="submit"]:hover, .copy-btn:hover {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-@media (max-width: 900px) {
-    .form-grid, .output-area {
-        grid-template-columns: 1fr;
-    }
-} 
-/* =================================== */
-/* GAYA UNTUK MANAJEMEN KARAKTER BARU */
-/* =================================== */
-
-.character-manager {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-#character-tabs {
-    display: flex;
-    gap: 0.5rem;
-    flex-grow: 1; /* Membuat tab mengisi ruang yang tersedia */
-}
-
-.tab-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: 1px solid var(--border-color);
-    background-color: var(--input-background);
-    color: var(--label-color);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-}
-
-.tab-btn:hover {
-    background-color: #e9ecef;
-    border-color: #ced4da;
-}
-
-.tab-btn.active {
-    background-color: var(--primary-color);
-    color: #fff;
-    border-color: var(--primary-color);
-    box-shadow: 0 4px 10px rgba(74, 144, 226, 0.2);
-}
-
-#add-character-btn {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #fff;
-    background: var(--secondary-color);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-#add-character-btn:hover {
-    background: #45d1b5;
-    transform: translateY(-1px);
-}
-
-.delete-btn {
-    color: #ff6b6b; /* Warna merah untuk tanda bahaya */
-    font-weight: bold;
-    font-size: 0.8rem;
-    margin-left: 8px;
-    padding: 2px 4px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-}
-
-.tab-btn:hover .delete-btn {
-    background-color: rgba(255, 0, 0, 0.1);
-}
-
-.tab-btn.active .delete-btn {
-    color: #fff; /* Agar terlihat di tab yang aktif */
-}
-
-.tab-btn.active:hover .delete-btn {
-    background-color: rgba(255, 255, 255, 0.2);
-}
 /* =================================== */
 /* GAYA UNTUK LAYOUT STORYBOARD BARU */
 /* =================================== */
-body {
-    padding: 0;
-    display: flex;
-    min-height: 100vh;
-}
-
 .story-container {
     display: grid;
-    grid-template-columns: 300px 1.5fr 1fr; /* Kolom: Storyboard, Editor, Output */
+    grid-template-columns: 300px 1.5fr 1fr;
     width: 100%;
     height: 100vh;
     gap: 1px;
     background-color: var(--border-color);
-    
-    /* Menghapus style .container lama */
-    max-width: none;
-    margin: 0;
-    padding: 0;
-    box-shadow: none;
-    border-radius: 0;
 }
 
 #storyboard-panel, #editor-panel, #output-panel {
-    background-color: var(--background-color);
+    background-color: #F9FAFB;
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
 }
 
-#editor-panel {
+#editor-panel, #output-panel {
     background-color: var(--card-background);
 }
 
@@ -365,11 +251,6 @@ body {
     color: var(--label-color);
 }
 
-.storyboard-footer {
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-}
-
 .add-scene-button, #generate-all-btn {
     width: 100%;
     padding: 0.8rem;
@@ -394,7 +275,6 @@ body {
      background-color: #45d1b5;
 }
 
-/* Penyesuaian untuk .container lama */
 .editor-container, .output-container {
     width: 100%;
     max-width: 100%;
@@ -412,7 +292,87 @@ body {
     font-weight: 600;
     color: var(--primary-color);
 }
-/* GAYA UNTUK TOMBOL HAPUS ADEGAN */
+
+.character-manager {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#character-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-grow: 1;
+}
+
+.tab-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-background);
+    color: var(--label-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.tab-btn:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.tab-btn.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(74, 144, 226, 0.2);
+}
+
+#add-character-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--secondary-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#add-character-btn:hover {
+    background: #45d1b5;
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-left: 8px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.tab-btn:hover .delete-btn {
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.tab-btn.active .delete-btn {
+    color: #fff;
+}
+
+.tab-btn.active:hover .delete-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
 .scene-card .delete-btn {
     position: absolute;
     top: 5px;
@@ -426,31 +386,18 @@ body {
 }
 
 .scene-card .delete-btn:hover {
-    color: #ff6b6b; /* Warna merah saat di-hover */
-}
-/* =================================== */
-/* GAYA UNTUK FOOTER BARU             */
-/* =================================== */
-
-/* GAYA BARU UNTUK FOOTER DI PANEL KIRI */
-
-/* Ubah body untuk menghapus padding bawah yang tidak perlu */
-body {
-    padding: 0;
-    display: flex;
-    min-height: 100vh;
+    color: #ff6b6b;
 }
 
-/* Ubah storyboard-footer agar footer bisa menempel di bawahnya */
 .storyboard-footer {
-    margin-top: auto; /* Trik CSS untuk mendorong elemen ini ke bawah */
+    margin-top: auto;
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
 }
 
-/* Gaya baru untuk footer yang sudah dipindahkan */
+/* GAYA BARU UNTUK FOOTER YANG SUDAH DIPINDAHKAN */
 .site-footer {
-    padding-top: 1.5rem; /* Memberi jarak dari tombol di atasnya */
+    padding-top: 1.5rem;
     text-align: center;
 }
 
