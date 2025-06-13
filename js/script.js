@@ -34,10 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeSceneIndex > -1) {
                 saveCurrentSceneData();
             }
-            const jsonString = JSON.stringify(story);
-            const encryptedData = CryptoJS.AES.encrypt(jsonString, SECRET_KEY).toString();
-            localStorage.setItem(LOCAL_STORAGE_KEY, encryptedData);
-            console.log("Proyek dienkripsi dan disimpan.");
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(story));
+            console.log("Proyek disimpan ke Local Storage.");
         } catch (error) {
             console.error("Gagal menyimpan proyek:", error);
         }
@@ -53,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("Gagal mendekripsi data, kemungkinan kunci salah atau data rusak.");
                 }
                 story = JSON.parse(decryptedJsonString);
-                console.log("Proyek berhasil didekripsi dan dimuat.");
                 return true;
             } catch (error) {
                 console.error("Gagal memuat data proyek:", error);
@@ -67,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // FUNGSI-FUNGSI UTAMA (LEVEL ADEGAN)
     // =================================================================
+
     function renderSceneList() {
         sceneListContainer.innerHTML = '';
         story.scenes.forEach((scene, index) => {
@@ -109,8 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
+        saveStoryToLocalStorage(); // MEMASTIKAN PENYIMPANAN SETELAH SWITCH
     }
-
+    
     function deleteScene(index) {
         const sceneNameToDelete = story.scenes[index].title || `Adegan ${index + 1}`;
         if (confirm(`Anda yakin ingin menghapus "${sceneNameToDelete}"?`)) {
@@ -190,6 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scene.activeCharacterIndex = charIndex;
         loadCharacterData();
         renderCharacterTabs();
+        saveStoryToLocalStorage(); // MEMASTIKAN PENYIMPANAN SETELAH SWITCH
     }
 
     function loadCharacterData() {
@@ -242,13 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // EVENT LISTENERS & INISIALISASI
     // =================================================================
-    if (addSceneBtn) addSceneBtn.addEventListener('click', addScene);
-    if (addCharacterBtn) addCharacterBtn.addEventListener('click', addCharacter);
+    addSceneBtn.addEventListener('click', addScene);
+    addCharacterBtn.addEventListener('click', addCharacter);
     
-    if (form) form.addEventListener('input', saveStoryToLocalStorage);
+    form.addEventListener('input', saveStoryToLocalStorage);
     window.addEventListener('beforeunload', saveStoryToLocalStorage);
 
-    if (form) form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveCurrentSceneData();
         generateBtn.textContent = 'Membuat Prompt...';
@@ -256,13 +256,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentScene = story.scenes[activeSceneIndex];
         if (!currentScene) { generateBtn.textContent = 'Buat Prompt untuk Adegan Ini'; generateBtn.disabled = false; return; }
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
-        if(promptIdOutput) promptIdOutput.value = promptID;
-        if(promptEnOutput) promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
+        promptIdOutput.value = promptID;
+        promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
         generateBtn.textContent = 'Buat Prompt untuk Adegan Ini';
         generateBtn.disabled = false;
     });
-
-    if (generateAllBtn) generateAllBtn.addEventListener('click', async () => {
+    
+    generateAllBtn.addEventListener('click', async () => {
         saveCurrentSceneData();
         generateAllBtn.textContent = 'Membuat Naskah...';
         generateAllBtn.disabled = true;
@@ -274,8 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 fullScriptID += `--- ADEGAN: ${scene.title} ---\n\n${promptID}\n\n\n`;
                 fullScriptEN += `--- SCENE: ${scene.title} ---\n\n${promptEN}\n\n\n`;
             }
-            if(promptIdOutput) promptIdOutput.value = fullScriptID;
-            if(promptEnOutput) promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
+            promptIdOutput.value = fullScriptID;
+            promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
         } catch (error) {
             console.error("Error saat membuat naskah lengkap:", error);
             alert("Gagal membuat naskah lengkap.");
@@ -288,7 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         if (loadStoryFromLocalStorage() && story.scenes.length > 0) {
             activeSceneIndex = 0;
-            switchScene(0);
+            loadSceneData(activeSceneIndex);
+            renderSceneList();
         } else {
             addScene();
         }
