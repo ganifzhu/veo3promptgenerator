@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // DEKLARASI ELEMEN HTML
+    // DEKLARASI ELEMEN & KONSTANTA
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
     const generateAllBtn = document.getElementById('generate-all-btn');
-    const translateBtn = document.getElementById('translate-btn');
     const promptIdOutput = document.getElementById('prompt-id');
     const promptEnOutput = document.getElementById('prompt-en');
     const copyIdBtn = document.getElementById('copy-id-btn');
@@ -279,17 +278,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (key === 'suaraLingkungan') textToTranslate = textToTranslate.replace('SOUND:', '');
             if (key === 'negatif') textToTranslate = textToTranslate.replace('Hindari:', '');
             sceneDataEn[key] = await t(textToTranslate);
-await delay(150);
+            await delay(150);
         }
+
         const translatedCharacters = [];
         for (const char of allCharacters) {
             const charEn = { nama: char.nama, dialog: char.dialog };
-            charEn.karakter = await t(char.karakter); await delay(150);
+            // KESALAHAN ADA DI SINI, SEHARUSNYA 'deskripsi' BUKAN 'karakter'
+            charEn.deskripsi = await t(char.karakter); await delay(150);
             charEn.suara = await t(char.suara); await delay(150);
             charEn.aksi = await t(char.aksi); await delay(150);
             charEn.ekspresi = await t(char.ekspresi); await delay(150);
             translatedCharacters.push(charEn);
         }
+        
         const cameraMovementEn = sceneData.kamera.match(/\(([^)]+)\)/) ? sceneData.kamera.match(/\(([^)]+)\)/)[1] : sceneData.kamera;
         const characterDetailsEN = translatedCharacters.map(c=>`**[Character: ${c.nama}]**\n- Description: ${c.deskripsi||'(...)'}\n- Voice: ${c.suara||'(...)'}\n- Action: ${c.aksi||'(...)'}\n- Expression: ${c.ekspresi||'(...)'}\n- Dialogue: ${extractDialog(c.dialog)||'(...)'}`).join('\n\n');
         return `**[Scene Title]**\n${sceneDataEn.judul}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${sceneDataEn.latar}. ${sceneDataEn.suasana}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${sceneDataEn.pencahayaan}.\nVisual Style: ${sceneDataEn.gayaVisual}, ${sceneDataEn.kualitasVisual}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${sceneDataEn.suaraLingkungan.trim()}\n\n**[Negative Prompt]**\nAvoid: ${sceneDataEn.negatif.trim()}`;
@@ -333,6 +335,6 @@ await delay(150);
 
     setupCopyButton(copyIdBtn, promptIdOutput);
     setupCopyButton(copyEnBtn, promptEnOutput);
-
+    
     initialize();
 });
