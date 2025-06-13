@@ -426,3 +426,25 @@ button[type="submit"]:hover, .copy-btn:hover {
 #translate-btn:hover {
     background-color: #2980b9;
 }
+/* GAYA UNTUK TOMBOL SIMPAN/MUAT FILE */
+.file-operations {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.file-operations button {
+    flex: 1; /* Membuat kedua tombol memiliki lebar yang sama */
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.file-operations button:hover {
+    background-color: #5a6268;
+}
