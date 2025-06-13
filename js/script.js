@@ -219,3 +219,4 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupCopyButton(button, sourceElement) {
         button.addEventListener('click', () => {
             const textToCopy = sourceElement.isContentEditable || sourceElement.tagName === 'TEXTAREA' || sourceElement.tagName === 'INPUT
+});
