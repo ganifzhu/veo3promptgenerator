@@ -14,8 +14,17 @@
         </header>
 
         <form id="prompt-form">
+            <div class="character-manager">
+                <div id="character-tabs">
+                    </div>
+                <button type="button" id="add-character-btn">+ Tambah Karakter</button>
+            </div>
+    
+            <div class="form-group">
+                <label for="nama">Nama Karakter (untuk Tab)</label>
+                <input type="text" id="nama" placeholder="Contoh: Anya, Budi, dll.">
+            </div>
             <div class="form-grid">
-                <!-- Kolom 1: Judul & Karakter -->
                 <div class="form-column">
                     <div class="form-group">
                         <label for="judul">1. Judul Adegan</label>
@@ -31,7 +40,6 @@
                     </div>
                 </div>
 
-                <!-- Kolom 2: Aksi & Latar -->
                 <div class="form-column">
                     <div class="form-group">
                         <label for="aksi">4. Aksi Karakter</label>
@@ -51,35 +59,34 @@
                     </div>
                 </div>
 
-                <!-- Kolom 3: Detail Visual & Audio -->
                 <div class="form-column">
                     <fieldset class="form-group-fieldset">
                         <legend>7. Detail Visual Tambahan</legend>
                         <div class="form-group">
                             <label for="kamera">Gerakan Kamera</label>
                             <select id="kamera">
-                                <option value="Static (Statis)">Static (Statis)</option>
-                                <option value="Pan Left (Geser Kiri)">Pan Left (Geser Kiri)</option>
-                                <option value="Pan Right (Geser Kanan)">Pan Right (Geser Kanan)</option>
-                                <option value="Tilt Up (Mendongak ke Atas)">Tilt Up (Mendongak ke Atas)</option>
-                                <option value="Tilt Down (Menunduk ke Bawah)">Tilt Down (Menunduk ke Bawah)</option>
-                                <option value="Dolly In (Mendekat)">Dolly In (Mendekat)</option>
-                                <option value="Dolly Out (Menjauh)">Dolly Out (Menjauh)</option>
-                                <option value="Truck Left (Geser ke Kiri)">Truck Left (Geser ke Kiri)</option>
-                                <option value="Truck Right (Geser ke Kanan)">Truck Right (Geser ke Kanan)</option>
-                                <option value="Zoom In (Perbesar)">Zoom In (Perbesar)</option>
-                                <option value="Zoom Out (Perkecil)">Zoom Out (Perkecil)</option>
-                                <option value="Crane Up (Kamera Naik)">Crane Up (Kamera Naik)</option>
-                                <option value="Crane Down (Kamera Turun)">Crane Down (Kamera Turun)</option>
-                                <option value="Tracking Shot (Mengikuti Objek)" selected>Tracking Shot (Mengikuti Objek)</option>
-                                <option value="Handheld (Genggam Tangan)">Handheld (Genggam Tangan)</option>
-                                <option value="Drone Shot (Tembakan Drone)">Drone Shot (Tembakan Drone)</option>
-                                <option value="Vertigo/Dolly Zoom (Efek Vertigo)">Vertigo/Dolly Zoom (Efek Vertigo)</option>
-                                <option value="3D Rotation (Rotasi 3D)">3D Rotation (Rotasi 3D)</option>
-                                <option value="Clockwise Rotation (Rotasi Searah Jarum Jam)">Clockwise Rotation (Rotasi Searah Jarum Jam)</option>
-                                <option value="Counter-Clockwise Rotation (Rotasi Berlawanan Jarum Jam)">Counter-Clockwise Rotation (Rotasi Berlawanan Jarum Jam)</option>
-                                <option value="Arc Shot (Gerakan Melengkung)">Arc Shot (Gerakan Melengkung)</option>
-                                <option value="Whip Pan (Geser Cepat)">Whip Pan (Geser Cepat)</option>
+                                <option>Static (Statis)</option>
+                                <option>Pan Left (Geser Kiri)</option>
+                                <option>Pan Right (Geser Kanan)</option>
+                                <option>Tilt Up (Mendongak ke Atas)</option>
+                                <option>Tilt Down (Menunduk ke Bawah)</option>
+                                <option>Dolly In (Mendekat)</option>
+                                <option>Dolly Out (Menjauh)</option>
+                                <option>Truck Left (Geser ke Kiri)</option>
+                                <option>Truck Right (Geser ke Kanan)</option>
+                                <option>Zoom In (Perbesar)</option>
+                                <option>Zoom Out (Perkecil)</option>
+                                <option>Crane Up (Kamera Naik)</option>
+                                <option>Crane Down (Kamera Turun)</option>
+                                <option selected>Tracking Shot (Mengikuti Objek)</option>
+                                <option>Handheld (Genggam Tangan)</option>
+                                <option>Drone Shot (Tembakan Drone)</option>
+                                <option>Vertigo/Dolly Zoom (Efek Vertigo)</option>
+                                <option>3D Rotation (Rotasi 3D)</option>
+                                <option>Clockwise Rotation (Rotasi Searah Jarum Jam)</option>
+                                <option>Counter-Clockwise Rotation (Rotasi Berlawanan Jarum Jam)</option>
+                                <option>Arc Shot (Gerakan Melengkung)</option>
+                                <option>Whip Pan (Geser Cepat)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -98,7 +105,6 @@
                 </div>
             </div>
 
-            <!-- Bagian Bawah -->
             <div class="form-group">
                 <label for="suara-lingkungan">9. Suara Lingkungan / Ambience</label>
                 <textarea id="suara-lingkungan" rows="3" placeholder="Contoh: SOUND: suara mesin bus menyala, pengumuman dari pengeras suara, derai hujan ringan..."></textarea>
@@ -133,4 +139,4 @@
 
     <script src="js/script.js"></script>
 </body>
-</html> 
+</html>
