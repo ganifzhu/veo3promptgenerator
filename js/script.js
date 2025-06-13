@@ -158,18 +158,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
 
     form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        saveCurrentCharacterData();
-        generateBtn.textContent = 'Membuat Prompt...';
-        generateBtn.disabled = true;
-        const currentCharacterData = characters[activeCharacterIndex];
-        const { promptID, promptEN } = await generatePrompts(currentCharacterData);
-        promptIdOutput.value = promptID;
-        promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
-        generateBtn.textContent = 'Buat Prompt';
-        generateBtn.disabled = false;
-    });
+    e.preventDefault();
+    saveCurrentCharacterData();
+    generateBtn.textContent = 'Membuat Prompt...';
+    generateBtn.disabled = true;
 
+    // --- PERUBAHANNYA DI SINI ---
+    // Kita sekarang mengirim seluruh array 'characters' ke fungsi generatePrompts
+    const { promptID, promptEN } = await generatePrompts(characters);
+    // ----------------------------
+
+    promptIdOutput.value = promptID;
+    promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
+    generateBtn.textContent = 'Buat Prompt';
+    generateBtn.disabled = false;
+});
     addCharacterBtn.addEventListener('click', () => addCharacter(false));
 
     function initialize() {
@@ -186,16 +189,54 @@ document.addEventListener('DOMContentLoaded', () => {
     // FUNGSI-FUNGSI LAINNYA (HELPER FUNCTIONS)
     // =================================================================
 
-    async function generatePrompts(data) {
-        const promptID = `**[Judul Adegan]**\n${data.judul}\n\n**[Deskripsi Karakter Utama]**\n${data.karakter}\n\n**[Detail Suara Karakter]**\n${data.suara}\n\n**[Aksi & Ekspresi Karakter]**\n${data.aksi}. ${data.ekspresi}.\n\n**[Latar & Suasana]**\n${data.latar}. ${data.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${data.kamera}.\nPencahayaan: ${data.pencahayaan}.\nGaya Visual: ${data.gayaVisual}, ${data.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${data.suaraLingkungan}\n${data.dialog}\n\n**[Negative Prompt]**\n${data.negatif}`;
-        const dialogText = extractDialog(data.dialog);
-        const t = (text) => translateText(text, 'en', 'id');
-        const [judulEn, karakterEn, suaraEn, aksiEn, ekspresiEn, latarEn, suasanaEn, pencahayaanEn, gayaVisualEn, kualitasVisualEn, suaraLingkunganEn, negatifEn] = await Promise.all([t(data.judul), t(data.karakter), t(data.suara.replace('PENTING: Seluruh dialog harus dalam Bahasa Indonesia dengan pengucapan natural dan jelas. Pastikan suara karakter ini konsisten di seluruh video.', '')), t(data.aksi), t(data.ekspresi), t(data.latar), t(data.suasana), t(data.pencahayaan), t(data.gayaVisual), t(data.kualitasVisual), t(data.suaraLingkungan.replace('SOUND:', '')), t(data.negatif.replace('Hindari:', ''))]);
-        const cameraMatch = data.kamera ? data.kamera.match(/\(([^)]+)\)/) : null;
-        const cameraMovementEn = cameraMatch ? cameraMatch[1] : data.kamera;
-        const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[Main Character Description]**\n${karakterEn}\n\n**[Character Voice Details]**\n${suaraEn} IMPORTANT: All dialogue must be in natural and clear Indonesian. Ensure this character's voice is consistent throughout the video.\n\n**[Character Action & Expression]**\n${aksiEn}. ${ekspresiEn}.\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n${dialogText}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
-        return { promptID, promptEN };
+    async function generatePrompts(allCharacters) {
+    if (allCharacters.length === 0) {
+        return { promptID: "Tidak ada karakter untuk dibuatkan prompt.", promptEN: "No characters to generate a prompt for." };
     }
+
+    // --- Bagian 1: Ambil data umum adegan (dari karakter pertama) ---
+    const sceneData = allCharacters[0];
+
+    // --- Bagian 2: Gabungkan semua deskripsi, aksi, dan dialog karakter ---
+    const characterDetails = allCharacters.map(char => {
+        return `**[Karakter: ${char.nama}]**
+- Deskripsi Inti: ${char.karakter}
+- Detail Suara: ${char.suara}
+- Aksi: ${char.aksi}
+- Ekspresi: ${char.ekspresi}
+- Dialog: ${char.dialog}`;
+    }).join('\n\n'); // Gabungkan setiap blok karakter dengan spasi baris
+
+    // --- Bagian 3: Susun Prompt Bahasa Indonesia yang baru ---
+    const promptID =
+`**[Judul Adegan]**
+${sceneData.judul}
+
+**[INFORMASI KARAKTER DALAM ADEGAN]**
+${characterDetails}
+
+**[Latar & Suasana]**
+${sceneData.latar}. ${sceneData.suasana}.
+
+**[Detail Visual & Sinematografi]**
+Gerakan Kamera: ${sceneData.kamera}.
+Pencahayaan: ${sceneData.pencahayaan}.
+Gaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.
+
+**[Audio]**
+Suara Lingkungan: ${sceneData.suaraLingkungan}
+
+**[Negative Prompt]**
+${sceneData.negatif}`;
+
+    // --- Bagian 4: Logika terjemahan (disederhanakan untuk sekarang) ---
+    // Menerjemahkan prompt gabungan bisa menjadi rumit dan lambat.
+    // Untuk saat ini, kita bisa tampilkan pesan atau terjemahkan judul saja.
+    const judulEn = await translateText(sceneData.judul, 'en', 'id');
+    const promptEN = `**[Scene Title]**\n${judulEn}\n\n(Full English prompt generation for multiple characters can be developed next.)`;
+
+    return { promptID, promptEN };
+}
 
     function extractDialog(dialogInput) {
         if (!dialogInput) return '';
