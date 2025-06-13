@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // DEKLARASI ELEMEN HTML
+    // DEKLARASI ELEMEN & KONSTANTA
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     function saveStoryToLocalStorage() {
         try {
+            // Selalu simpan data form yang aktif sebelum menyimpan ke local storage
             if (activeSceneIndex > -1) {
                 saveCurrentSceneData();
             }
@@ -101,8 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
+        saveStoryToLocalStorage(); // Simpan setiap kali ganti adegan
     }
-
+    
     function deleteScene(index) {
         const sceneNameToDelete = story.scenes[index].title || `Adegan ${index + 1}`;
         if (confirm(`Anda yakin ingin menghapus "${sceneNameToDelete}"?`)) {
@@ -176,12 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function switchCharacter(charIndex) {
+        saveCurrentCharacterData();
         const scene = story.scenes[activeSceneIndex];
         if (!scene) return;
-        saveCurrentCharacterData();
         scene.activeCharacterIndex = charIndex;
         loadCharacterData();
         renderCharacterTabs();
+        saveStoryToLocalStorage(); // Simpan setiap kali ganti karakter
     }
 
     function loadCharacterData() {
@@ -236,10 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     addSceneBtn.addEventListener('click', addScene);
     addCharacterBtn.addEventListener('click', addCharacter);
-
-    // Pemicu untuk menyimpan data secara berkala setiap kali ada ketikan
-    form.addEventListener('input', saveStoryToLocalStorage); 
-    // Jaring pengaman terakhir sebelum menutup tab
+    
+    form.addEventListener('input', saveStoryToLocalStorage);
     window.addEventListener('beforeunload', saveStoryToLocalStorage);
 
     form.addEventListener('submit', async (e) => {
@@ -248,14 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.textContent = 'Membuat Prompt...';
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
-        if (!currentScene) { generateBtn.textContent = 'Buat Prompt untuk Adegan Ini'; generateBtn.disabled = false; return; }
+        if (!currentScene) { /*...*/ return; }
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
         promptIdOutput.value = promptID;
         promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
         generateBtn.textContent = 'Buat Prompt untuk Adegan Ini';
         generateBtn.disabled = false;
     });
-
+    
     generateAllBtn.addEventListener('click', async () => {
         saveCurrentSceneData();
         generateAllBtn.textContent = 'Membuat Naskah...';
@@ -282,7 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         if (loadStoryFromLocalStorage() && story.scenes.length > 0) {
             activeSceneIndex = 0;
-            switchScene(0);
+            loadSceneData(activeSceneIndex);
+            renderSceneList();
         } else {
             addScene();
         }
