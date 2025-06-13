@@ -19,19 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     let characters = [{
         nama: 'Karakter 1',
-        judul: '',
-        karakter: '',
-        suara: '',
-        aksi: '',
-        ekspresi: '',
-        latar: '',
-        kamera: 'Tracking Shot (Mengikuti Objek)',
-        pencahayaan: '',
-        gayaVisual: 'cinematic realistis',
-        kualitasVisual: 'Resolusi 4K',
-        suasana: '',
-        suaraLingkungan: '',
-        dialog: '',
+        judul: '', karakter: '', suara: '', aksi: '', ekspresi: '',
+        latar: '', kamera: 'Tracking Shot (Mengikuti Objek)', pencahayaan: '',
+        gayaVisual: 'cinematic realistis', kualitasVisual: 'Resolusi 4K',
+        suasana: '', suaraLingkungan: '', dialog: '',
         negatif: 'teks, logo, subtitle, watermark, distorsi wajah, artefak'
     }];
 
@@ -47,15 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const tabButton = document.createElement('button');
             tabButton.type = 'button';
             tabButton.className = 'tab-btn';
-            if (index === activeCharacterIndex) {
-                tabButton.classList.add('active');
-            }
+            if (index === activeCharacterIndex) { tabButton.classList.add('active'); }
             const tabText = document.createTextNode(char.nama || `Karakter ${index + 1}`);
             tabButton.appendChild(tabText);
             tabButton.dataset.index = index;
-            tabButton.addEventListener('click', () => {
-                switchCharacter(index);
-            });
+            tabButton.addEventListener('click', () => { switchCharacter(index); });
+            
             const deleteBtn = document.createElement('span');
             deleteBtn.className = 'delete-btn';
             deleteBtn.innerHTML = '&times;';
@@ -94,21 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadCharacterData(index) {
         if (index < 0 || index >= characters.length) return;
         const charData = characters[index];
-        const allKeys = Object.keys(charData);
-        allKeys.forEach(key => {
-            const elementId = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-            const element = document.getElementById(elementId);
+        Object.keys(charData).forEach(key => {
+            const element = document.getElementById(key.replace(/([A-Z])/g, "-$1").toLowerCase());
             if (element) {
                 if (element.tagName === 'SELECT') {
                     for (let i = 0; i < element.options.length; i++) {
-                        if (element.options[i].text === charData[key]) {
-                            element.selectedIndex = i;
-                            break;
-                        }
+                        if (element.options[i].text === charData[key]) { element.selectedIndex = i; break; }
                     }
-                } else {
-                    element.value = charData[key] || '';
-                }
+                } else { element.value = charData[key] || ''; }
             }
         });
     }
@@ -116,27 +97,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveCurrentCharacterData() {
         if (activeCharacterIndex < 0 || activeCharacterIndex >= characters.length) return;
         const charData = characters[activeCharacterIndex];
-        const allKeys = Object.keys(charData);
-        allKeys.forEach(key => {
-            const elementId = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-            const element = document.getElementById(elementId);
+        Object.keys(charData).forEach(key => {
+            const element = document.getElementById(key.replace(/([A-Z])/g, "-$1").toLowerCase());
             if (element) {
                 if (element.tagName === 'SELECT') {
                     charData[key] = element.options[element.selectedIndex].text;
-                } else {
-                    charData[key] = element.value;
-                }
+                } else { charData[key] = element.value; }
             }
         });
     }
 
     function addCharacter(isFirst = false) {
-        if (!isFirst && characters.length > 0) {
-            saveCurrentCharacterData();
-        }
+        if (!isFirst && characters.length > 0) saveCurrentCharacterData();
         const newIndex = characters.length;
         const previousCharacter = characters[activeCharacterIndex];
-
         characters.push({
             nama: `Karakter ${newIndex + 1}`,
             judul: isFirst ? '' : previousCharacter.judul,
@@ -158,21 +132,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
 
     form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    saveCurrentCharacterData();
-    generateBtn.textContent = 'Membuat Prompt...';
-    generateBtn.disabled = true;
+        e.preventDefault();
+        saveCurrentCharacterData(); // Simpan karakter terakhir yang diedit
+        generateBtn.textContent = 'Membuat Prompt...';
+        generateBtn.disabled = true;
 
-    // --- PERUBAHANNYA DI SINI ---
-    // Kita sekarang mengirim seluruh array 'characters' ke fungsi generatePrompts
-    const { promptID, promptEN } = await generatePrompts(characters);
-    // ----------------------------
+        // **PERUBAHAN KUNCI 1: Mengirim seluruh array 'characters'**
+        const { promptID, promptEN } = await generatePrompts(characters);
 
-    promptIdOutput.value = promptID;
-    promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
-    generateBtn.textContent = 'Buat Prompt';
-    generateBtn.disabled = false;
-});
+        promptIdOutput.value = promptID;
+        promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
+        generateBtn.textContent = 'Buat Prompt';
+        generateBtn.disabled = false;
+    });
+
     addCharacterBtn.addEventListener('click', () => addCharacter(false));
 
     function initialize() {
@@ -189,26 +162,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // FUNGSI-FUNGSI LAINNYA (HELPER FUNCTIONS)
     // =================================================================
 
+    // **PERUBAHAN KUNCI 2: Mengubah total isi fungsi ini**
     async function generatePrompts(allCharacters) {
-    if (allCharacters.length === 0) {
-        return { promptID: "Tidak ada karakter untuk dibuatkan prompt.", promptEN: "No characters to generate a prompt for." };
-    }
+        if (allCharacters.length === 0) {
+            return { promptID: "Tidak ada karakter untuk dibuatkan prompt.", promptEN: "No characters to generate a prompt for." };
+        }
 
-    // --- Bagian 1: Ambil data umum adegan (dari karakter pertama) ---
-    const sceneData = allCharacters[0];
+        // Ambil data umum adegan (dari karakter pertama sebagai acuan)
+        const sceneData = allCharacters[0];
 
-    // --- Bagian 2: Gabungkan semua deskripsi, aksi, dan dialog karakter ---
-    const characterDetails = allCharacters.map(char => {
-        return `**[Karakter: ${char.nama}]**
-- Deskripsi Inti: ${char.karakter}
-- Detail Suara: ${char.suara}
-- Aksi: ${char.aksi}
-- Ekspresi: ${char.ekspresi}
-- Dialog: ${char.dialog}`;
-    }).join('\n\n'); // Gabungkan setiap blok karakter dengan spasi baris
+        // Gabungkan detail SEMUA karakter menjadi satu blok teks
+        const characterDetails = allCharacters.map(char => {
+            return `**[Karakter: ${char.nama}]**
+- Deskripsi: ${char.karakter || '(tidak ada deskripsi)'}
+- Suara: ${char.suara || '(tidak ada detail suara)'}
+- Aksi: ${char.aksi || '(tidak ada aksi)'}
+- Ekspresi: ${char.ekspresi || '(tidak ada ekspresi)'}
+- Dialog: ${char.dialog || '(tidak ada dialog)'}`;
+        }).join('\n\n'); // Beri jarak antar blok karakter
 
-    // --- Bagian 3: Susun Prompt Bahasa Indonesia yang baru ---
-    const promptID =
+        // Susun prompt akhir dengan format baru
+        const promptID =
 `**[Judul Adegan]**
 ${sceneData.judul}
 
@@ -229,14 +203,12 @@ Suara Lingkungan: ${sceneData.suaraLingkungan}
 **[Negative Prompt]**
 ${sceneData.negatif}`;
 
-    // --- Bagian 4: Logika terjemahan (disederhanakan untuk sekarang) ---
-    // Menerjemahkan prompt gabungan bisa menjadi rumit dan lambat.
-    // Untuk saat ini, kita bisa tampilkan pesan atau terjemahkan judul saja.
-    const judulEn = await translateText(sceneData.judul, 'en', 'id');
-    const promptEN = `**[Scene Title]**\n${judulEn}\n\n(Full English prompt generation for multiple characters can be developed next.)`;
+        // Logika terjemahan kita sederhanakan dulu untuk fokus pada fungsionalitas utama
+        const judulEn = await translateText(sceneData.judul, 'en', 'id');
+        const promptEN = `**[Scene Title]**\n${judulEn}\n\n(Full English prompt generation for multiple characters is the next step.)`;
 
-    return { promptID, promptEN };
-}
+        return { promptID, promptEN };
+    }
 
     function extractDialog(dialogInput) {
         if (!dialogInput) return '';
@@ -258,7 +230,7 @@ ${sceneData.negatif}`;
             return `[Translation Error] ${text}`;
         }
     }
-
+    
     function setupCopyButton(button, sourceElement) {
         button.addEventListener('click', () => {
             const textToCopy = sourceElement.isContentEditable || sourceElement.tagName === 'TEXTAREA' || sourceElement.tagName === 'INPUT' ? sourceElement.value : sourceElement.innerText;
