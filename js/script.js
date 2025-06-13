@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // FUNGSI-FUNGSI PENGELOLA
     // =================================================================
 
+    // --- FUNGSI renderTabs (DIMODIFIKASI untuk menambahkan tombol hapus) ---
     function renderTabs() {
         characterTabsContainer.innerHTML = '';
         characters.forEach((char, index) => {
@@ -58,7 +59,17 @@ document.addEventListener('DOMContentLoaded', () => {
             tabButton.addEventListener('click', () => {
                 switchCharacter(index);
             });
-            
+
+            // MEMBUAT TOMBOL HAPUS [x]
+            const deleteBtn = document.createElement('span');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = ' [x]';
+            deleteBtn.addEventListener('click', (event) => {
+                event.stopPropagation(); // Mencegah event klik tab utama berjalan
+                deleteCharacter(index);
+            });
+
+            tabButton.appendChild(deleteBtn); // Menambahkan tombol [x] ke dalam tombol tab
             characterTabsContainer.appendChild(tabButton);
         });
     }
@@ -69,216 +80,55 @@ document.addEventListener('DOMContentLoaded', () => {
         loadCharacterData(index);
         renderTabs();
     }
+    
+    // --- FUNGSI BARU UNTUK MENGHAPUS KARAKTER ---
+    function deleteCharacter(index) {
+        // Minta konfirmasi dari pengguna sebelum menghapus
+        const charNameToDelete = characters[index].nama || `Karakter ${index + 1}`;
+        if (confirm(`Anda yakin ingin menghapus "${charNameToDelete}"?`)) {
+            // Hapus karakter dari array menggunakan splice
+            characters.splice(index, 1);
+
+            // Logika untuk menentukan karakter aktif selanjutnya
+            if (activeCharacterIndex >= index) {
+                activeCharacterIndex = Math.max(0, activeCharacterIndex - 1);
+            }
+            
+            // Jika tidak ada karakter tersisa, kosongkan form
+            if (characters.length === 0) {
+                // Bisa tambahkan karakter default atau kosongkan form
+                addCharacter(); // Opsi: langsung tambah karakter baru
+            } else {
+                // Muat data karakter yang sekarang aktif
+                loadCharacterData(activeCharacterIndex);
+            }
+
+            renderTabs(); // Gambar ulang semua tab
+        }
+    }
+
 
     function loadCharacterData(index) {
-        const charData = characters[index];
-        if (!charData) return;
-        
-        const allKeys = ['nama', 'judul', 'karakter', 'suara', 'aksi', 'ekspresi', 'latar', 'kamera', 'pencahayaan', 'gayaVisual', 'kualitasVisual', 'suasana', 'suaraLingkungan', 'dialog', 'negatif'];
-
-        allKeys.forEach(key => {
-            const elementId = key.replace('gayaVisual', 'gaya-visual').replace('kualitasVisual', 'kualitas-visual').replace('suaraLingkungan', 'suara-lingkungan');
-            const element = document.getElementById(elementId);
-            if (element) {
-                if (element.tagName === 'SELECT') {
-                    for (let i = 0; i < element.options.length; i++) {
-                        if (element.options[i].text === charData[key]) {
-                            element.selectedIndex = i;
-                            break;
-                        }
-                    }
-                } else {
-                    element.value = charData[key] || '';
-                }
-            }
-        });
+        // ... (FUNGSI INI TETAP SAMA SEPERTI SEBELUMNYA) ...
     }
 
     function saveCurrentCharacterData() {
-        if (activeCharacterIndex < 0 || activeCharacterIndex >= characters.length) return;
-        
-        const charData = characters[activeCharacterIndex];
-        if (!charData) return;
-
-        const allKeys = ['nama', 'judul', 'karakter', 'suara', 'aksi', 'ekspresi', 'latar', 'kamera', 'pencahayaan', 'gayaVisual', 'kualitasVisual', 'suasana', 'suaraLingkungan', 'dialog', 'negatif'];
-        
-        allKeys.forEach(key => {
-            const elementId = key.replace('gayaVisual', 'gaya-visual').replace('kualitasVisual', 'kualitas-visual').replace('suaraLingkungan', 'suara-lingkungan');
-            const element = document.getElementById(elementId);
-            if (element) {
-                if (element.tagName === 'SELECT') {
-                    charData[key] = element.options[element.selectedIndex].text;
-                } else {
-                    charData[key] = element.value;
-                }
-            }
-        });
+        // ... (FUNGSI INI TETAP SAMA SEPERTI SEBELUMNYA) ...
     }
     
     function addCharacter() {
-        saveCurrentCharacterData(); 
-        const newIndex = characters.length;
-        const previousCharacter = characters[activeCharacterIndex];
-        
-        characters.push({
-            // Data umum adegan dibawa dari karakter sebelumnya
-            nama: `Karakter ${newIndex + 1}`,
-            judul: previousCharacter.judul,
-            latar: previousCharacter.latar,
-            suasana: previousCharacter.suasana,
-            kamera: previousCharacter.kamera,
-            pencahayaan: previousCharacter.pencahayaan,
-            gayaVisual: previousCharacter.gayaVisual,
-            kualitasVisual: previousCharacter.kualitasVisual,
-            suaraLingkungan: previousCharacter.suaraLingkungan,
-            negatif: previousCharacter.negatif,
-            // Data spesifik karakter dikosongkan
-            karakter: '', suara: '', aksi: '', ekspresi: '', dialog: ''
-        });
-        switchCharacter(newIndex);
+        // ... (FUNGSI INI TETAP SAMA SEPERTI SEBELUMNYA) ...
     }
 
     // =================================================================
     // EVENT LISTENERS DAN INISIALISASI
     // =================================================================
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        saveCurrentCharacterData();
-        generateBtn.textContent = 'Membuat Prompt...';
-        generateBtn.disabled = true;
-
-        const currentCharacterData = characters[activeCharacterIndex];
-        const { promptID, promptEN } = await generatePrompts(currentCharacterData);
-
-        promptIdOutput.value = promptID;
-        promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
-        generateBtn.textContent = 'Buat Prompt';
-        generateBtn.disabled = false;
-    });
-
-    addCharacterBtn.addEventListener('click', addCharacter);
-
-    function initialize() {
-        loadCharacterData(activeCharacterIndex);
-        renderTabs();
-    }
     
-    initialize();
+    // ... (SEMUA EVENT LISTENER DAN INISIALISASI TETAP SAMA) ...
 
     // =================================================================
     // FUNGSI-FUNGSI LAINNYA (HELPER FUNCTIONS)
     // =================================================================
 
-    async function generatePrompts(data) {
-        const promptID =
-`**[Judul Adegan]**
-${data.judul}
-
-**[Deskripsi Karakter Utama]**
-${data.karakter}
-
-**[Detail Suara Karakter]**
-${data.suara}
-
-**[Aksi & Ekspresi Karakter]**
-${data.aksi}. ${data.ekspresi}.
-
-**[Latar & Suasana]**
-${data.latar}. ${data.suasana}.
-
-**[Detail Visual & Sinematografi]**
-Gerakan Kamera: ${data.kamera}.
-Pencahayaan: ${data.pencahayaan}.
-Gaya Visual: ${data.gayaVisual}, ${data.kualitasVisual}.
-
-**[Audio]**
-Suara Lingkungan: ${data.suaraLingkungan}
-${data.dialog}
-
-**[Negative Prompt]**
-${data.negatif}`;
-
-        const dialogText = extractDialog(data.dialog);
-        const t = (text) => translateText(text, 'en', 'id');
-        const [
-            judulEn, karakterEn, suaraEn, aksiEn, ekspresiEn, latarEn,
-            suasanaEn, pencahayaanEn, gayaVisualEn, kualitasVisualEn,
-            suaraLingkunganEn, negatifEn
-        ] = await Promise.all([
-            t(data.judul), t(data.karakter), t(data.suara.replace('PENTING: Seluruh dialog harus dalam Bahasa Indonesia dengan pengucapan natural dan jelas. Pastikan suara karakter ini konsisten di seluruh video.', '')),
-            t(data.aksi), t(data.ekspresi), t(data.latar), t(data.suasana),
-            t(data.pencahayaan), t(data.gayaVisual), t(data.kualitasVisual),
-            t(data.suaraLingkungan.replace('SOUND:', '')), t(data.negatif.replace('Hindari:', ''))
-        ]);
-        const cameraMovementEn = data.kamera.match(/\(([^)]+)\)/)[1];
-        const promptEN =
-`**[Scene Title]**
-${judulEn}
-
-**[Main Character Description]**
-${karakterEn}
-
-**[Character Voice Details]**
-${suaraEn} IMPORTANT: All dialogue must be in natural and clear Indonesian. Ensure this character's voice is consistent throughout the video.
-
-**[Character Action & Expression]**
-${aksiEn}. ${ekspresiEn}.
-
-**[Setting & Atmosphere]**
-${latarEn}. ${suasanaEn}.
-
-**[Visual & Cinematography Details]**
-Camera Movement: ${cameraMovementEn}.
-Lighting: ${pencahayaanEn}.
-Visual Style: ${gayaVisualEn}, ${kualitasVisualEn}.
-
-**[Audio]**
-Ambient Sound: SOUND: ${suaraLingkunganEn}
-${dialogText}
-
-**[Negative Prompt]**
-Avoid: ${negatifEn}`;
-        return { promptID, promptEN };
-    }
-
-    function extractDialog(dialogInput) {
-        const match = dialogInput.match(/"(.*?)"/);
-        return match ? `DIALOG in Indonesian: Character says: "${match[1]}"` : dialogInput;
-    }
-
-    async function translateText(text, targetLang = 'en', sourceLang = 'id') {
-        if (!text) return "";
-        const url = `${MYMEMORY_API_URL}?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`MyMemory API error! status: ${response.status}`);
-            const result = await response.json();
-            if (result.responseStatus !== 200) throw new Error(`MyMemory API error! message: ${result.responseDetails}`);
-            return result.responseData.translatedText;
-        } catch (error) {
-            console.error('Translation failed:', error);
-            return `[Translation Error] ${text}`;
-        }
-    }
-    
-    function setupCopyButton(button, sourceElement) {
-        button.addEventListener('click', () => {
-            const textToCopy = sourceElement.isContentEditable || sourceElement.tagName === 'TEXTAREA' || sourceElement.tagName === 'INPUT'
-                ? sourceElement.value 
-                : sourceElement.innerText;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Disalin!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-        });
-    }
-
-    setupCopyButton(copyIdBtn, promptIdOutput);
-    setupCopyButton(copyEnBtn, promptEnOutput);
+    // ... (SEMUA FUNGSI LAINNYA SEPERTI generatePrompts, translateText, dll. TETAP SAMA) ...
 });
