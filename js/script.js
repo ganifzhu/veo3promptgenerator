@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
-    const generateAllBtn = document.getElementById('generate-all-btn'); // Tombol baru
+    const generateAllBtn = document.getElementById('generate-all-btn');
     const promptIdOutput = document.getElementById('prompt-id');
     const promptEnOutput = document.getElementById('prompt-en');
     const copyIdBtn = document.getElementById('copy-id-btn');
@@ -177,14 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
     addSceneBtn.addEventListener('click', addScene);
     addCharacterBtn.addEventListener('click', addCharacter);
 
-    // Event listener untuk tombol utama (hanya generate 1 adegan)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveCurrentSceneData();
         generateBtn.textContent = 'Membuat Prompt...';
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
-        if (!currentScene) { /* ... handle error ... */ return; }
+        if (!currentScene) { generateBtn.textContent = 'Buat Prompt untuk Adegan Ini'; generateBtn.disabled = false; return; }
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
         promptIdOutput.value = promptID;
         promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
@@ -192,29 +191,36 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.disabled = false;
     });
 
-    // LOGIKA BARU: Event listener untuk tombol "Buat Naskah Lengkap"
+    // PERBAIKAN DI SINI: Menambahkan try...catch untuk menangani error
     generateAllBtn.addEventListener('click', async () => {
-        saveCurrentSceneData(); // Simpan adegan terakhir yang aktif
+        saveCurrentSceneData();
         generateAllBtn.textContent = 'Membuat Naskah...';
         generateAllBtn.disabled = true;
 
-        let fullScriptID = `PROYEK: ${story.projectTitle || 'Naskah Lengkap'}\n====================\n\n`;
-        let fullScriptEN = `PROJECT: ${story.projectTitle || 'Full Script'}\n====================\n\n`;
+        try {
+            let fullScriptID = `PROYEK: ${story.projectTitle || 'Naskah Lengkap'}\n====================\n\n`;
+            let fullScriptEN = `PROJECT: ${story.projectTitle || 'Full Script'}\n====================\n\n`;
 
-        for (let i = 0; i < story.scenes.length; i++) {
-            const scene = story.scenes[i];
-            const { promptID, promptEN } = await generatePrompts(scene.sceneData, scene.characters);
-            fullScriptID += `--- ADEGAN ${i + 1}: ${scene.title} ---\n\n${promptID}\n\n`;
-            fullScriptEN += `--- SCENE ${i + 1}: ${scene.title} ---\n\n${promptEN}\n\n`;
+            for (let i = 0; i < story.scenes.length; i++) {
+                const scene = story.scenes[i];
+                // Menunggu setiap prompt selesai sebelum lanjut ke berikutnya
+                const { promptID, promptEN } = await generatePrompts(scene.sceneData, scene.characters);
+                fullScriptID += `--- ADEGAN ${i + 1}: ${scene.title} ---\n\n${promptID}\n\n\n`;
+                fullScriptEN += `--- SCENE ${i + 1}: ${scene.title} ---\n\n${promptEN}\n\n\n`;
+            }
+
+            promptIdOutput.value = fullScriptID;
+            promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
+
+        } catch (error) {
+            console.error("Terjadi error saat membuat naskah lengkap:", error);
+            alert("Gagal membuat naskah lengkap. Silakan coba lagi atau periksa console untuk detail error.");
+        } finally {
+            // Bagian ini akan selalu berjalan, baik sukses maupun error
+            generateAllBtn.textContent = 'Buat Naskah Lengkap';
+            generateAllBtn.disabled = false;
         }
-
-        promptIdOutput.value = fullScriptID;
-        promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
-
-        generateAllBtn.textContent = 'Buat Naskah Lengkap';
-        generateAllBtn.disabled = false;
     });
-
 
     function initialize() {
         if (story.scenes.length === 0) {
@@ -229,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // FUNGSI GENERATE PROMPT & HELPERS
     // =================================================================
     async function generatePrompts(sceneData, allCharacters) {
-        // ... (Fungsi ini tidak perlu diubah dari versi sebelumnya) ...
+        // ... (Fungsi ini tidak berubah) ...
     }
     
     // ... (Fungsi-fungsi helper lainnya juga tidak berubah) ...
