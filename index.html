@@ -7,27 +7,45 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
     <div class="story-container">
         <aside id="storyboard-panel">
-            <div class="storyboard-header"><h2>Daftar Adegan</h2></div>
-            <div id="scene-list"></div>
+            <div class="storyboard-header">
+                <h2>Daftar Adegan</h2>
+            </div>
+            <div id="scene-list">
+                </div>
             <div class="storyboard-footer">
-                <button type="button" id="add-scene-btn" class="add-scene-button">+ Tambah Adegan Baru</button>
-                <footer class="site-footer"><p>Dibuat oleh Ganif Susanto &copy; 2025</p></footer>
+                <button type="button" id="add-scene-btn" class="add-scene-button">
+                    + Tambah Adegan Baru
+                </button>
+
+                <div class="file-operations">
+                    <button type="button" id="save-to-file-btn">Simpan ke File</button>
+                    <button type="button" id="load-from-file-btn">Muat dari File</button>
+                    <input type="file" id="file-input" accept=".json" style="display: none;">
+                </div>
+                
+                <footer class="site-footer">
+                    <p>Dibuat oleh Ganif Susanto &copy; 2025</p>
+                </footer>
             </div>
         </aside>
 
         <main id="editor-panel">
             <div class="editor-container">
-                <header><h1>Veo 3 Prompt Editor</h1><p>Isi detail adegan dan karakter yang sedang aktif.</p></header>
+                 <header>
+                    <h1>Veo 3 Prompt Editor</h1>
+                    <p>Isi detail adegan dan karakter yang sedang aktif.</p>
+                </header>
                 <form id="prompt-form">
                     <fieldset class="section-fieldset">
                         <legend>Informasi Adegan</legend>
                         <div class="form-grid">
                             <div class="form-column">
                                 <div class="form-group"><label for="judul">Judul Adegan</label><input type="text" id="judul" placeholder="Contoh: Pertemuan di Terminal Senja"></div>
-                                <div class="form-group"><label for="latar">Latar Tempat & Waktu</label><textarea id="latar" rows="4" placeholder="Contoh: Di terminal bus..."></textarea></div>
-                                <div class="form-group"><label for="suasana">Suasana Keseluruhan</label><textarea id="suasana" rows="3" placeholder="Contoh: Suasana sibuk..."></textarea></div>
+                                <div class="form-group"><label for="latar">Latar Tempat & Waktu</label><textarea id="latar" rows="4" placeholder="Contoh: Di terminal bus antar kota malam hari..."></textarea></div>
+                                 <div class="form-group"><label for="suasana">Suasana Keseluruhan</label><textarea id="suasana" rows="3" placeholder="Contoh: Suasana sibuk, ramai..."></textarea></div>
                             </div>
                             <div class="form-column">
                                 <fieldset class="form-group-fieldset">
@@ -44,6 +62,7 @@
                             </div>
                         </div>
                     </fieldset>
+
                     <fieldset class="section-fieldset">
                         <legend>Detail Karakter dalam Adegan</legend>
                         <div class="character-manager"><div id="character-tabs"></div><button type="button" id="add-character-btn">+ Tambah Karakter</button></div>
@@ -51,7 +70,7 @@
                             <div class="form-column">
                                 <div class="form-group"><label for="nama">Nama Karakter</label><input type="text" id="nama" placeholder="Contoh: Anya, Budi..."></div>
                                 <div class="form-group"><label for="karakter">Deskripsi Karakter</label><textarea id="karakter" rows="6" placeholder="Deskripsi fisik, pakaian..."></textarea></div>
-                                <div class="form-group"><label for="suara">Detail Suara</label><textarea id="suara" rows="4" placeholder="Nada, timbre, aksen..."></textarea></div>
+                                 <div class="form-group"><label for="suara">Detail Suara</label><textarea id="suara" rows="4" placeholder="Nada, timbre, aksen..."></textarea></div>
                             </div>
                             <div class="form-column">
                                 <div class="form-group"><label for="aksi">Aksi Spesifik</label><textarea id="aksi" rows="5" placeholder="Apa yang dilakukan karakter ini?"></textarea></div>
@@ -66,6 +85,7 @@
                 </form>
             </div>
         </main>
+
         <aside id="output-panel">
             <div class="output-container">
                 <div class="output-column">
@@ -87,6 +107,7 @@
             </div>
         </aside>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <script src="js/script.js"></script>
 </body>
