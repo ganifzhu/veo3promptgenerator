@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // LANGKAH 1: PERSIAPAN VARIABEL DAN PONDASI DATA
+    // DEKLARASI ELEMEN HTML
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
@@ -9,12 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyIdBtn = document.getElementById('copy-id-btn');
     const copyEnBtn = document.getElementById('copy-en-btn');
 
+    const addCharacterBtn = document.getElementById('add-character-btn');
+    const characterTabsContainer = document.getElementById('character-tabs');
+
     const MYMEMORY_API_URL = 'https://api.mymemory.translated.net/get';
 
-    // --- INILAH PONDASI BARU KITA ---
+    // =================================================================
+    // PONDASI DATA (STATE)
+    // =================================================================
     let characters = [
-        // Karakter pertama, diisi dengan data contoh Anda
         {
+            nama: 'Karakter 1',
             judul: 'Terminal dalam Senja',
             karakter: 'Seorang vlogger wanita muda asal Minang berusia 27 tahun. Perawakan/Bentuk Tubuh: tubuh mungil, tinggi 158cm, bentuk badan proporsional. Warna kulit: sawo matang cerah. Rambut: ikal sebahu, hitam kecokelatan, diikat setengah ke belakang. Wajah: wajah oval, alis tebal alami, mata hitam besar, senyum ramah, pipi merona, bibir natural dengan sentuhan lip tint. Pakaian: mengenakan jaket parasut warna kuning mustard dan celana panjang hitam, membawa ransel kecil.',
             suara: 'Dia berbicara dengan suara wanita muda yang hangat dan penuh semangat. Nada: mezzo-soprano. Timbre: bersahabat dan enerjik. Aksen/Logat: logat Indonesia dengan sentuhan khas Minang halus, berbicara murni dalam Bahasa Indonesia. Cara Berbicara: tempo sedang-cepat, gaya bicara lincah dan ekspresif. PENTING: Seluruh dialog harus dalam Bahasa Indonesia dengan pengucapan natural dan jelas. Pastikan suara karakter ini konsisten di seluruh video.',
@@ -32,23 +37,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    let activeCharacterIndex = 0; // Menandakan kita sedang mengedit karakter pertama (index 0)
-
+    let activeCharacterIndex = 0;
 
     // =================================================================
-    // LANGKAH 2: FUNGSI-FUNGSI BARU UNTUK MENGELOLA DATA
+    // FUNGSI-FUNGSI PENGELOLA
     // =================================================================
 
-    // FUNGSI UNTUK MENAMPILKAN DATA DARI JS KE FORM HTML
+    function renderTabs() {
+        characterTabsContainer.innerHTML = '';
+        characters.forEach((char, index) => {
+            const tabButton = document.createElement('button');
+            tabButton.type = 'button';
+            tabButton.className = 'tab-btn';
+            if (index === activeCharacterIndex) {
+                tabButton.classList.add('active');
+            }
+            tabButton.textContent = char.nama || `Karakter ${index + 1}`;
+            tabButton.dataset.index = index;
+
+            tabButton.addEventListener('click', () => {
+                switchCharacter(index);
+            });
+            
+            characterTabsContainer.appendChild(tabButton);
+        });
+    }
+
+    function switchCharacter(index) {
+        saveCurrentCharacterData();
+        activeCharacterIndex = index;
+        loadCharacterData(index);
+        renderTabs();
+    }
+
     function loadCharacterData(index) {
         const charData = characters[index];
-        if (!charData) return; // Jika data karakter tidak ada, hentikan
+        if (!charData) return;
+        
+        const allKeys = ['nama', 'judul', 'karakter', 'suara', 'aksi', 'ekspresi', 'latar', 'kamera', 'pencahayaan', 'gayaVisual', 'kualitasVisual', 'suasana', 'suaraLingkungan', 'dialog', 'negatif'];
 
-        // Mengisi setiap kolom form dengan data dari objek karakter
-        for (const key in charData) {
-            const element = document.getElementById(key);
+        allKeys.forEach(key => {
+            const elementId = key.replace('gayaVisual', 'gaya-visual').replace('kualitasVisual', 'kualitas-visual').replace('suaraLingkungan', 'suara-lingkungan');
+            const element = document.getElementById(elementId);
             if (element) {
-                 // Untuk dropdown/select, kita cari option yang teksnya cocok
                 if (element.tagName === 'SELECT') {
                     for (let i = 0; i < element.options.length; i++) {
                         if (element.options[i].text === charData[key]) {
@@ -57,26 +88,197 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 } else {
-                    element.value = charData[key];
+                    element.value = charData[key] || '';
                 }
             }
-        }
+        });
     }
 
-    // FUNGSI UNTUK MENYIMPAN DATA DARI FORM HTML KE JS
     function saveCurrentCharacterData() {
+        if (activeCharacterIndex < 0 || activeCharacterIndex >= characters.length) return;
+        
         const charData = characters[activeCharacterIndex];
         if (!charData) return;
 
-        // Mengambil nilai dari setiap kolom form dan menyimpannya ke objek karakter
-        for (const key in charData) {
-            const element = document.getElementById(key);
+        const allKeys = ['nama', 'judul', 'karakter', 'suara', 'aksi', 'ekspresi', 'latar', 'kamera', 'pencahayaan', 'gayaVisual', 'kualitasVisual', 'suasana', 'suaraLingkungan', 'dialog', 'negatif'];
+        
+        allKeys.forEach(key => {
+            const elementId = key.replace('gayaVisual', 'gaya-visual').replace('kualitasVisual', 'kualitas-visual').replace('suaraLingkungan', 'suara-lingkungan');
+            const element = document.getElementById(elementId);
             if (element) {
-                 if (element.tagName === 'SELECT') {
-                    charData[key] = element.selectedOptions[0].text;
-                 } else {
+                if (element.tagName === 'SELECT') {
+                    charData[key] = element.options[element.selectedIndex].text;
+                } else {
                     charData[key] = element.value;
-                 }
+                }
             }
+        });
+    }
+    
+    function addCharacter() {
+        saveCurrentCharacterData(); 
+        const newIndex = characters.length;
+        const previousCharacter = characters[activeCharacterIndex];
+        
+        characters.push({
+            // Data umum adegan dibawa dari karakter sebelumnya
+            nama: `Karakter ${newIndex + 1}`,
+            judul: previousCharacter.judul,
+            latar: previousCharacter.latar,
+            suasana: previousCharacter.suasana,
+            kamera: previousCharacter.kamera,
+            pencahayaan: previousCharacter.pencahayaan,
+            gayaVisual: previousCharacter.gayaVisual,
+            kualitasVisual: previousCharacter.kualitasVisual,
+            suaraLingkungan: previousCharacter.suaraLingkungan,
+            negatif: previousCharacter.negatif,
+            // Data spesifik karakter dikosongkan
+            karakter: '', suara: '', aksi: '', ekspresi: '', dialog: ''
+        });
+        switchCharacter(newIndex);
+    }
+
+    // =================================================================
+    // EVENT LISTENERS DAN INISIALISASI
+    // =================================================================
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        saveCurrentCharacterData();
+        generateBtn.textContent = 'Membuat Prompt...';
+        generateBtn.disabled = true;
+
+        const currentCharacterData = characters[activeCharacterIndex];
+        const { promptID, promptEN } = await generatePrompts(currentCharacterData);
+
+        promptIdOutput.value = promptID;
+        promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
+        generateBtn.textContent = 'Buat Prompt';
+        generateBtn.disabled = false;
+    });
+
+    addCharacterBtn.addEventListener('click', addCharacter);
+
+    function initialize() {
+        loadCharacterData(activeCharacterIndex);
+        renderTabs();
+    }
+    
+    initialize();
+
+    // =================================================================
+    // FUNGSI-FUNGSI LAINNYA (HELPER FUNCTIONS)
+    // =================================================================
+
+    async function generatePrompts(data) {
+        const promptID =
+`**[Judul Adegan]**
+${data.judul}
+
+**[Deskripsi Karakter Utama]**
+${data.karakter}
+
+**[Detail Suara Karakter]**
+${data.suara}
+
+**[Aksi & Ekspresi Karakter]**
+${data.aksi}. ${data.ekspresi}.
+
+**[Latar & Suasana]**
+${data.latar}. ${data.suasana}.
+
+**[Detail Visual & Sinematografi]**
+Gerakan Kamera: ${data.kamera}.
+Pencahayaan: ${data.pencahayaan}.
+Gaya Visual: ${data.gayaVisual}, ${data.kualitasVisual}.
+
+**[Audio]**
+Suara Lingkungan: ${data.suaraLingkungan}
+${data.dialog}
+
+**[Negative Prompt]**
+${data.negatif}`;
+
+        const dialogText = extractDialog(data.dialog);
+        const t = (text) => translateText(text, 'en', 'id');
+        const [
+            judulEn, karakterEn, suaraEn, aksiEn, ekspresiEn, latarEn,
+            suasanaEn, pencahayaanEn, gayaVisualEn, kualitasVisualEn,
+            suaraLingkunganEn, negatifEn
+        ] = await Promise.all([
+            t(data.judul), t(data.karakter), t(data.suara.replace('PENTING: Seluruh dialog harus dalam Bahasa Indonesia dengan pengucapan natural dan jelas. Pastikan suara karakter ini konsisten di seluruh video.', '')),
+            t(data.aksi), t(data.ekspresi), t(data.latar), t(data.suasana),
+            t(data.pencahayaan), t(data.gayaVisual), t(data.kualitasVisual),
+            t(data.suaraLingkungan.replace('SOUND:', '')), t(data.negatif.replace('Hindari:', ''))
+        ]);
+        const cameraMovementEn = data.kamera.match(/\(([^)]+)\)/)[1];
+        const promptEN =
+`**[Scene Title]**
+${judulEn}
+
+**[Main Character Description]**
+${karakterEn}
+
+**[Character Voice Details]**
+${suaraEn} IMPORTANT: All dialogue must be in natural and clear Indonesian. Ensure this character's voice is consistent throughout the video.
+
+**[Character Action & Expression]**
+${aksiEn}. ${ekspresiEn}.
+
+**[Setting & Atmosphere]**
+${latarEn}. ${suasanaEn}.
+
+**[Visual & Cinematography Details]**
+Camera Movement: ${cameraMovementEn}.
+Lighting: ${pencahayaanEn}.
+Visual Style: ${gayaVisualEn}, ${kualitasVisualEn}.
+
+**[Audio]**
+Ambient Sound: SOUND: ${suaraLingkunganEn}
+${dialogText}
+
+**[Negative Prompt]**
+Avoid: ${negatifEn}`;
+        return { promptID, promptEN };
+    }
+
+    function extractDialog(dialogInput) {
+        const match = dialogInput.match(/"(.*?)"/);
+        return match ? `DIALOG in Indonesian: Character says: "${match[1]}"` : dialogInput;
+    }
+
+    async function translateText(text, targetLang = 'en', sourceLang = 'id') {
+        if (!text) return "";
+        const url = `${MYMEMORY_API_URL}?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`MyMemory API error! status: ${response.status}`);
+            const result = await response.json();
+            if (result.responseStatus !== 200) throw new Error(`MyMemory API error! message: ${result.responseDetails}`);
+            return result.responseData.translatedText;
+        } catch (error) {
+            console.error('Translation failed:', error);
+            return `[Translation Error] ${text}`;
         }
     }
+    
+    function setupCopyButton(button, sourceElement) {
+        button.addEventListener('click', () => {
+            const textToCopy = sourceElement.isContentEditable || sourceElement.tagName === 'TEXTAREA' || sourceElement.tagName === 'INPUT'
+                ? sourceElement.value 
+                : sourceElement.innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Disalin!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
+    }
+
+    setupCopyButton(copyIdBtn, promptIdOutput);
+    setupCopyButton(copyEnBtn, promptEnOutput);
+});
