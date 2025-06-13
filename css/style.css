@@ -200,3 +200,86 @@ button[type="submit"]:hover, .copy-btn:hover {
         grid-template-columns: 1fr;
     }
 } 
+/* =================================== */
+/* GAYA UNTUK MANAJEMEN KARAKTER BARU */
+/* =================================== */
+
+.character-manager {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#character-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-grow: 1; /* Membuat tab mengisi ruang yang tersedia */
+}
+
+.tab-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-background);
+    color: var(--label-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.tab-btn:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.tab-btn.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(74, 144, 226, 0.2);
+}
+
+#add-character-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--secondary-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#add-character-btn:hover {
+    background: #45d1b5;
+    transform: translateY(-1px);
+}
+
+.delete-btn {
+    color: #ff6b6b; /* Warna merah untuk tanda bahaya */
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-left: 8px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.tab-btn:hover .delete-btn {
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.tab-btn.active .delete-btn {
+    color: #fff; /* Agar terlihat di tab yang aktif */
+}
+
+.tab-btn.active:hover .delete-btn {
+    background-color: rgba(255, 255, 255, 0.2);
+}
