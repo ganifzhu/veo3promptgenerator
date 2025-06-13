@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // DEKLARASI ELEMEN HTML
+    // DEKLARASI ELEMEN & KONSTANTA
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const characterTabsContainer = document.getElementById('character-tabs');
     const MYMEMORY_API_URL = 'https://api.mymemory.translated.net/get';
 
+    const LOCAL_STORAGE_KEY = 'veoPromptGeneratorStory'; // Kunci untuk penyimpanan
+
     // =================================================================
     // STRUKTUR DATA UTAMA (THE STORY)
     // =================================================================
@@ -22,6 +24,32 @@ document.addEventListener('DOMContentLoaded', () => {
         scenes: []
     };
     let activeSceneIndex = -1;
+
+    // =================================================================
+    // FUNGSI SIMPAN & MUAT DARI LOCAL STORAGE
+    // =================================================================
+    function saveStoryToLocalStorage() {
+        try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(story));
+        } catch (error) {
+            console.error("Gagal menyimpan proyek:", error);
+        }
+    }
+
+    function loadStoryFromLocalStorage() {
+        const savedStory = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedStory) {
+            try {
+                story = JSON.parse(savedStory);
+                return true;
+            } catch (error) {
+                console.error("Gagal memuat data proyek:", error);
+                localStorage.removeItem(LOCAL_STORAGE_KEY); // Hapus data rusak
+                return false;
+            }
+        }
+        return false;
+    }
 
     // =================================================================
     // FUNGSI-FUNGSI UTAMA (LEVEL ADEGAN)
@@ -32,27 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
         story.scenes.forEach((scene, index) => {
             const sceneCard = document.createElement('div');
             sceneCard.className = 'scene-card';
-            if (index === activeSceneIndex) {
-                sceneCard.classList.add('active');
-            }
+            if (index === activeSceneIndex) { sceneCard.classList.add('active'); }
             sceneCard.dataset.index = index;
             sceneCard.innerHTML = `<h3>${scene.title || `Adegan ${index + 1}`}</h3>`;
-            
-            // Event listener untuk beralih adegan
-            sceneCard.addEventListener('click', () => {
-                switchScene(index);
-            });
-
-            // Membuat tombol hapus [x] untuk setiap kartu adegan
+            sceneCard.addEventListener('click', () => switchScene(index));
             const deleteSceneBtn = document.createElement('span');
             deleteSceneBtn.className = 'delete-btn';
-            deleteSceneBtn.innerHTML = '&times;'; // Simbol 'x'
+            deleteSceneBtn.innerHTML = '&times;';
             deleteSceneBtn.title = `Hapus Adegan Ini`;
             deleteSceneBtn.addEventListener('click', (event) => {
-                event.stopPropagation(); // Mencegah klik pada kartu adegan saat hapus
+                event.stopPropagation();
                 deleteScene(index);
             });
-
             sceneCard.appendChild(deleteSceneBtn);
             sceneListContainer.appendChild(sceneCard);
         });
@@ -78,24 +97,23 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
+        saveStoryToLocalStorage(); // SIMPAN SETIAP GANTI ADEGAN
     }
-    
+
     function deleteScene(index) {
         const sceneNameToDelete = story.scenes[index].title || `Adegan ${index + 1}`;
         if (confirm(`Anda yakin ingin menghapus "${sceneNameToDelete}"?`)) {
             story.scenes.splice(index, 1);
-            
             if (activeSceneIndex >= index) {
                 activeSceneIndex = Math.max(0, activeSceneIndex - 1);
             }
-            
             renderSceneList();
-
             if (story.scenes.length === 0) {
                 addScene();
             } else {
                 loadSceneData(activeSceneIndex);
             }
+            saveStoryToLocalStorage(); // SIMPAN SETELAH HAPUS ADEGAN
         }
     }
 
@@ -163,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
         scene.activeCharacterIndex = charIndex;
         loadCharacterData();
         renderCharacterTabs();
+        saveStoryToLocalStorage(); // SIMPAN SETIAP GANTI KARAKTER
     }
 
     function loadCharacterData() {
@@ -204,8 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (scene.activeCharacterIndex >= charIndex) {
                 scene.activeCharacterIndex = Math.max(0, scene.activeCharacterIndex - 1);
             }
-            if (scene.characters.length === 0) addCharacter();
-            else switchCharacter(scene.activeCharacterIndex);
+            if (scene.characters.length === 0) {
+                 addCharacter();
+            } else {
+                 switchCharacter(scene.activeCharacterIndex);
+            }
+            saveStoryToLocalStorage(); // SIMPAN SETELAH HAPUS KARAKTER
         }
     }
 
@@ -218,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveCurrentSceneData();
+        saveStoryToLocalStorage(); // SIMPAN SEBELUM GENERATE
         generateBtn.textContent = 'Membuat Prompt...';
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
@@ -231,6 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     generateAllBtn.addEventListener('click', async () => {
         saveCurrentSceneData();
+        saveStoryToLocalStorage(); // SIMPAN SEBELUM GENERATE SEMUA
         generateAllBtn.textContent = 'Membuat Naskah...';
         generateAllBtn.disabled = true;
         try {
@@ -254,10 +279,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function initialize() {
-        if (story.scenes.length === 0) {
-            addScene();
+        if (loadStoryFromLocalStorage() && story.scenes.length > 0) {
+            activeSceneIndex = 0;
+            switchScene(activeSceneIndex);
         } else {
-            switchScene(0);
+            addScene();
         }
     }
     initialize();
@@ -268,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function generatePrompts(sceneData, allCharacters) {
         if (!sceneData || !allCharacters || allCharacters.length === 0) return { promptID: "", promptEN: "" };
         const characterDetails = allCharacters.map(char => {
-            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(...)'}\n- Suara: ${char.suara || '(...)'}\n- Aksi: ${char.aksi || '(...)'}\n- Ekspresi: ${char.ekspresi || '(...)'}\n- Dialog: ${char.dialog || '(...)'}`;
+            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(tidak ada deskripsi)'}\n- Suara: ${char.suara || '(tidak ada detail suara)'}\n- Aksi: ${char.aksi || '(tidak ada aksi)'}\n- Ekspresi: ${char.ekspresi || '(tidak ada ekspresi)'}\n- Dialog: ${char.dialog || '(tidak ada dialog)'}`;
         }).join('\n\n');
         const promptID = `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetails}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
         const t = (text) => translateText(text, 'en', 'id');
@@ -279,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return { nama: char.nama, deskripsi: karakterEn, suara: suaraEn, aksi: aksiEn, ekspresi: ekspresiEn, dialog: char.dialog };
         }));
         const characterDetailsEN = translatedCharacters.map(char => {
-            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(...)'}\n- Voice: ${char.suara || '(...)'}\n- Action: ${char.aksi || '(...)'}\n- Expression: ${char.ekspresi || '(...)'}\n- Dialogue: ${extractDialog(char.dialog) || '(...)'}`;
+            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(no description)'}\n- Voice: ${char.suara || '(no voice details)'}\n- Action: ${char.aksi || '(no action)'}\n- Expression: ${char.ekspresi || '(no expression)'}\n- Dialogue: ${extractDialog(char.dialog) || '(no dialogue)'}`;
         }).join('\n\n');
         const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
         return { promptID, promptEN };
