@@ -405,3 +405,24 @@ button[type="submit"]:hover, .copy-btn:hover {
     font-size: 0.8rem;
     color: var(--label-color);
 }
+.main-action-buttons {
+    grid-column: 1 / -1; /* Membuat div ini mengambil lebar penuh */
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+#translate-btn {
+     padding: 0.8rem 1.5rem;
+     background-color: #3498db; /* Warna biru yang berbeda */
+     color: white;
+     border: none;
+     border-radius: 8px;
+     font-weight: 600;
+     cursor: pointer;
+}
+
+#translate-btn:hover {
+    background-color: #2980b9;
+}
