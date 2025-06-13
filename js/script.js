@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MYMEMORY_API_URL = 'https://api.mymemory.translated.net/get';
 
     // =================================================================
-    // STRUKTUR DATA UTAMA (THE STORY)
+    // STRUKTUR DATA BARU (STATE)
     // =================================================================
     let story = {
         scenes: []
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeSceneIndex = -1;
 
     // =================================================================
-    // FUNGSI-FUNGSI LEVEL ADEGAN (SCENE)
+    // FUNGSI-FUNGSI UTAMA (LEVEL ADEGAN)
     // =================================================================
 
     function renderSceneList() {
@@ -48,9 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
             title: `Adegan ${story.scenes.length + 1}`,
             sceneData: {
                 judul: `Adegan ${story.scenes.length + 1}`,
-                latar: '', suasana: '', kamera: 'Tracking Shot (Mengikuti Objek)',
-                pencahayaan: '', gayaVisual: 'cinematic realistis', kualitasVisual: 'Resolusi 4K',
-                suaraLingkungan: '', negatif: 'teks, logo, subtitle'
+                latar: '',
+                suasana: '',
+                kamera: 'Tracking Shot (Mengikuti Objek)',
+                pencahayaan: '',
+                gayaVisual: '', // Sudah dikosongkan
+                kualitasVisual: '', // Sudah dikosongkan
+                suaraLingkungan: '',
+                negatif: '' // Sudah dikosongkan
             },
             characters: [{
                 nama: 'Karakter 1', karakter: '', suara: '', aksi: '', ekspresi: '', dialog: ''
@@ -190,6 +195,11 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.textContent = 'Membuat Prompt...';
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
+        if (!currentScene) {
+            generateBtn.textContent = 'Buat Prompt untuk Adegan Ini';
+            generateBtn.disabled = false;
+            return;
+        }
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
         promptIdOutput.value = promptID;
         promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
@@ -228,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
         return { promptID, promptEN };
     }
-
+    
     function extractDialog(dialogInput) {
         if (!dialogInput) return '';
         const match = dialogInput.match(/"(.*?)"/);
