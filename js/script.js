@@ -26,15 +26,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // FUNGSI-FUNGSI UTAMA (LEVEL ADEGAN)
     // =================================================================
+
     function renderSceneList() {
         sceneListContainer.innerHTML = '';
         story.scenes.forEach((scene, index) => {
             const sceneCard = document.createElement('div');
             sceneCard.className = 'scene-card';
-            if (index === activeSceneIndex) { sceneCard.classList.add('active'); }
+            if (index === activeSceneIndex) {
+                sceneCard.classList.add('active');
+            }
             sceneCard.dataset.index = index;
             sceneCard.innerHTML = `<h3>${scene.title || `Adegan ${index + 1}`}</h3>`;
-            sceneCard.addEventListener('click', () => switchScene(index));
+            
+            // Event listener untuk beralih adegan
+            sceneCard.addEventListener('click', () => {
+                switchScene(index);
+            });
+
+            // Membuat tombol hapus [x] untuk setiap kartu adegan
+            const deleteSceneBtn = document.createElement('span');
+            deleteSceneBtn.className = 'delete-btn';
+            deleteSceneBtn.innerHTML = '&times;'; // Simbol 'x'
+            deleteSceneBtn.title = `Hapus Adegan Ini`;
+            deleteSceneBtn.addEventListener('click', (event) => {
+                event.stopPropagation(); // Mencegah klik pada kartu adegan saat hapus
+                deleteScene(index);
+            });
+
+            sceneCard.appendChild(deleteSceneBtn);
             sceneListContainer.appendChild(sceneCard);
         });
     }
@@ -59,6 +78,25 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
+    }
+    
+    function deleteScene(index) {
+        const sceneNameToDelete = story.scenes[index].title || `Adegan ${index + 1}`;
+        if (confirm(`Anda yakin ingin menghapus "${sceneNameToDelete}"?`)) {
+            story.scenes.splice(index, 1);
+            
+            if (activeSceneIndex >= index) {
+                activeSceneIndex = Math.max(0, activeSceneIndex - 1);
+            }
+            
+            renderSceneList();
+
+            if (story.scenes.length === 0) {
+                addScene();
+            } else {
+                loadSceneData(activeSceneIndex);
+            }
+        }
     }
 
     function loadSceneData(index) {
@@ -184,9 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
         if (!currentScene) { generateBtn.textContent = 'Buat Prompt untuk Adegan Ini'; generateBtn.disabled = false; return; }
-        
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
-        
         promptIdOutput.value = promptID;
         promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
         generateBtn.textContent = 'Buat Prompt untuk Adegan Ini';
@@ -227,12 +263,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initialize();
 
     // =================================================================
-    // FUNGSI GENERATE PROMPT & HELPERS (SUDAH DIISI LENGKAP)
+    // FUNGSI GENERATE PROMPT & HELPERS
     // =================================================================
     async function generatePrompts(sceneData, allCharacters) {
         if (!sceneData || !allCharacters || allCharacters.length === 0) return { promptID: "", promptEN: "" };
         const characterDetails = allCharacters.map(char => {
-            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(...)'}\n- Suara: ${char.suara || '(...)'}\n- Aksi: ${char.aksi || '(...)'}\n- Ekspresi: ${char.ekspresi || '(...)'}\n- Dialog: ${char.dialog || '(...'}`;
+            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(...)'}\n- Suara: ${char.suara || '(...)'}\n- Aksi: ${char.aksi || '(...)'}\n- Ekspresi: ${char.ekspresi || '(...)'}\n- Dialog: ${char.dialog || '(...)'}`;
         }).join('\n\n');
         const promptID = `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetails}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
         const t = (text) => translateText(text, 'en', 'id');
@@ -243,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return { nama: char.nama, deskripsi: karakterEn, suara: suaraEn, aksi: aksiEn, ekspresi: ekspresiEn, dialog: char.dialog };
         }));
         const characterDetailsEN = translatedCharacters.map(char => {
-            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(...)'}\n- Voice: ${char.suara || '(...)'}\n- Action: ${char.aksi || '(...)'}\n- Expression: ${char.ekspresi || '(...)'}\n- Dialogue: ${extractDialog(char.dialog) || '(...'}`;
+            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(...)'}\n- Voice: ${char.suara || '(...)'}\n- Action: ${char.aksi || '(...)'}\n- Expression: ${char.ekspresi || '(...)'}\n- Dialogue: ${extractDialog(char.dialog) || '(...)'}`;
         }).join('\n\n');
         const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
         return { promptID, promptEN };
