@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const LOCAL_STORAGE_KEY = 'veoPromptGeneratorStory';
     const SECRET_KEY = 'KunciRahasiaSuperAman_GantiDenganTeksUnikAnda';
 
+    // Variabel baru untuk cache terjemahan
+    const translationCache = {};
+
     // =================================================================
     // STRUKTUR DATA UTAMA (THE STORY)
     // =================================================================
@@ -232,8 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (scene.activeCharacterIndex >= charIndex) {
                 scene.activeCharacterIndex = Math.max(0, scene.activeCharacterIndex - 1);
             }
-            if (scene.characters.length === 0) { addCharacter(); }
-            else { switchCharacter(scene.activeCharacterIndex); }
+            if (scene.characters.length === 0) {
+                addCharacter();
+            } else {
+                switchCharacter(scene.activeCharacterIndex);
+            }
         }
     }
 
@@ -295,28 +301,23 @@ document.addEventListener('DOMContentLoaded', () => {
     initialize();
 
     // =================================================================
-    // FUNGSI GENERATE PROMPT & HELPERS (DENGAN LOGIKA TRANSLATE HANDAL)
+    // FUNGSI GENERATE PROMPT & HELPERS
     // =================================================================
     async function generatePrompts(sceneData, allCharacters) {
         if (!sceneData || !allCharacters || allCharacters.length === 0) return { promptID: "", promptEN: "" };
-        
-        // Prompt Bahasa Indonesia (tidak perlu await, langsung jadi)
-        const characterDetailsID = allCharacters.map(char => {
-            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(tidak ada deskripsi)'}\n- Suara: ${char.suara || '(tidak ada detail suara)'}\n- Aksi: ${char.aksi || '(tidak ada aksi)'}\n- Ekspresi: ${char.ekspresi || '(tidak ada ekspresi)'}\n- Dialog: ${char.dialog || '(tidak ada dialog)'}`;
+        const characterDetails = allCharacters.map(char => {
+            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(...)'}\n- Suara: ${char.suara || '(...)'}\n- Aksi: ${char.aksi || '(...)'}\n- Ekspresi: ${char.ekspresi || '(...)'}\n- Dialog: ${char.dialog || '(...)'}`;
         }).join('\n\n');
-        const promptID = `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetailsID}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
+        const promptID = `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetails}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
         
-        // --- PROMPT BAHASA INGGRIS (Metode Handal) ---
         const t = (text) => translateText(text, 'en', 'id');
         
-        // 1. Terjemahkan data adegan
         const [judulEn, latarEn, suasanaEn, pencahayaanEn, gayaVisualEn, kualitasVisualEn, suaraLingkunganEn, negatifEn] = await Promise.all([
             t(sceneData.judul), t(sceneData.latar), t(sceneData.suasana), t(sceneData.pencahayaan), 
             t(sceneData.gayaVisual), t(sceneData.kualitasVisual), t(sceneData.suaraLingkungan.replace('SOUND:', '')), t(sceneData.negatif.replace('Hindari:', ''))
         ]);
         const cameraMovementEn = sceneData.kamera.match(/\(([^)]+)\)/) ? sceneData.kamera.match(/\(([^)]+)\)/)[1] : sceneData.kamera;
 
-        // 2. Terjemahkan semua data karakter secara bersamaan
         const translatedCharacters = await Promise.all(allCharacters.map(async (char) => {
             const [karakterEn, suaraEn, aksiEn, ekspresiEn] = await Promise.all([
                 t(char.karakter), t(char.suara), t(char.aksi), t(char.ekspresi)
@@ -324,9 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return { nama: char.nama, deskripsi: karakterEn, suara: suaraEn, aksi: aksiEn, ekspresi: ekspresiEn, dialog: char.dialog };
         }));
 
-        // 3. Susun kembali prompt Inggris
         const characterDetailsEN = translatedCharacters.map(char => {
-            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(no description)'}\n- Voice: ${char.suara || '(no voice details)'}\n- Action: ${char.aksi || '(no action)'}\n- Expression: ${char.ekspresi || '(no expression)'}\n- Dialogue: ${extractDialog(char.dialog) || '(no dialogue)'}`;
+            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(...)'}\n- Voice: ${char.suara || '(...)'}\n- Action: ${char.aksi || '(...)'}\n- Expression: ${char.ekspresi || '(...)'}\n- Dialogue: ${extractDialog(char.dialog) || '(...)'}`;
         }).join('\n\n');
 
         const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
@@ -342,13 +342,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function translateText(text, targetLang = 'en', sourceLang = 'id') {
         if (!text || text.trim() === '') return "";
+
+        if (translationCache[text]) {
+            return translationCache[text];
+        }
+
         const url = `${MYMEMORY_API_URL}?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
         try {
             const response = await fetch(url);
-            if (!response.ok) throw new Error(`API error: ${response.status}`);
+            if (!response.ok) {
+                if (response.status === 429) {
+                    console.warn("Rate limit tercapai. Tidak mencoba lagi untuk teks ini.");
+                    return `[Rate Limit] ${text}`;
+                }
+                throw new Error(`API error: ${response.status}`);
+            }
             const result = await response.json();
             if (result.responseStatus !== 200) throw new Error(`MyMemory API error: ${result.responseDetails}`);
-            return result.responseData.translatedText;
+            
+            const translatedText = result.responseData.translatedText;
+            translationCache[text] = translatedText;
+            return translatedText;
+
         } catch (error) {
             console.error('Translation failed:', error);
             return `[Translation Error]`;
