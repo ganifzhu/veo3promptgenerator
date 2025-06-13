@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // DEKLARASI ELEMEN & KONSTANTA
+    // DEKLARASI ELEMEN HTML
     // =================================================================
     const form = document.getElementById('prompt-form');
     const generateBtn = document.getElementById('generate-btn');
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const MYMEMORY_API_URL = 'https://api.mymemory.translated.net/get';
 
     const LOCAL_STORAGE_KEY = 'veoPromptGeneratorStory';
-    // PENTING: Ganti kunci rahasia ini dengan teks unik Anda sendiri!
     const SECRET_KEY = 'KunciRahasiaSuperAman_GantiDenganTeksUnikAnda';
 
     // =================================================================
@@ -36,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveCurrentSceneData();
             }
             const jsonString = JSON.stringify(story);
-            // ENKRIPSI DATA SEBELUM DISIMPAN
             const encryptedData = CryptoJS.AES.encrypt(jsonString, SECRET_KEY).toString();
             localStorage.setItem(LOCAL_STORAGE_KEY, encryptedData);
             console.log("Proyek dienkripsi dan disimpan.");
@@ -49,20 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const encryptedData = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (encryptedData) {
             try {
-                // DEKRIPSI DATA SETELAH DIMUAT
                 const bytes = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
                 const decryptedJsonString = bytes.toString(CryptoJS.enc.Utf8);
-                
                 if (!decryptedJsonString) {
                     throw new Error("Gagal mendekripsi data, kemungkinan kunci salah atau data rusak.");
                 }
-
                 story = JSON.parse(decryptedJsonString);
                 console.log("Proyek berhasil didekripsi dan dimuat.");
                 return true;
             } catch (error) {
                 console.error("Gagal memuat data proyek:", error);
-                localStorage.removeItem(LOCAL_STORAGE_KEY); // Hapus data rusak
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
                 return false;
             }
         }
@@ -247,13 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // EVENT LISTENERS & INISIALISASI
     // =================================================================
-    addSceneBtn.addEventListener('click', addScene);
-    addCharacterBtn.addEventListener('click', addCharacter);
+    if (addSceneBtn) addSceneBtn.addEventListener('click', addScene);
+    if (addCharacterBtn) addCharacterBtn.addEventListener('click', addCharacter);
     
-    form.addEventListener('input', saveStoryToLocalStorage);
+    if (form) form.addEventListener('input', saveStoryToLocalStorage);
     window.addEventListener('beforeunload', saveStoryToLocalStorage);
 
-    form.addEventListener('submit', async (e) => {
+    if (form) form.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveCurrentSceneData();
         generateBtn.textContent = 'Membuat Prompt...';
@@ -261,13 +256,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentScene = story.scenes[activeSceneIndex];
         if (!currentScene) { generateBtn.textContent = 'Buat Prompt untuk Adegan Ini'; generateBtn.disabled = false; return; }
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
-        promptIdOutput.value = promptID;
-        promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
+        if(promptIdOutput) promptIdOutput.value = promptID;
+        if(promptEnOutput) promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
         generateBtn.textContent = 'Buat Prompt untuk Adegan Ini';
         generateBtn.disabled = false;
     });
 
-    generateAllBtn.addEventListener('click', async () => {
+    if (generateAllBtn) generateAllBtn.addEventListener('click', async () => {
         saveCurrentSceneData();
         generateAllBtn.textContent = 'Membuat Naskah...';
         generateAllBtn.disabled = true;
@@ -279,8 +274,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 fullScriptID += `--- ADEGAN: ${scene.title} ---\n\n${promptID}\n\n\n`;
                 fullScriptEN += `--- SCENE: ${scene.title} ---\n\n${promptEN}\n\n\n`;
             }
-            promptIdOutput.value = fullScriptID;
-            promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
+            if(promptIdOutput) promptIdOutput.value = fullScriptID;
+            if(promptEnOutput) promptEnOutput.innerHTML = fullScriptEN.replace(/\n/g, '<br>');
         } catch (error) {
             console.error("Error saat membuat naskah lengkap:", error);
             alert("Gagal membuat naskah lengkap.");
