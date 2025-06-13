@@ -15,86 +15,67 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     // STRUKTUR DATA BARU (STATE)
     // =================================================================
-    // Data Adegan (hanya ada satu objek) - Dikosongkan saat mulai
     let sceneData = {
-        judul: '',
-        latar: '',
-        suasana: '',
-        kamera: 'Tracking Shot (Mengikuti Objek)',
-        pencahayaan: '',
-        gayaVisual: 'cinematic realistis',
-        kualitasVisual: 'Resolusi 4K',
-        suaraLingkungan: '',
-        negatif: 'teks, logo, subtitle, watermark, distorsi wajah, artefak'
+        judul: '', latar: '', suasana: '', kamera: 'Tracking Shot (Mengikuti Objek)',
+        pencahayaan: '', gayaVisual: 'cinematic realistis', kualitasVisual: 'Resolusi 4K',
+        suaraLingkungan: '', negatif: 'teks, logo, subtitle, watermark, distorsi wajah, artefak'
     };
 
-    // Data Karakter (dimulai dengan satu karakter kosong)
     let characters = [{
-        nama: 'Karakter 1',
-        karakter: '',
-        suara: '',
-        aksi: '',
-        ekspresi: '',
-        dialog: ''
+        nama: 'Karakter 1', karakter: '', suara: '', aksi: '', ekspresi: '', dialog: ''
     }];
 
     let activeCharacterIndex = 0;
+
+    const sceneFieldIds = ['judul', 'latar', 'suasana', 'kamera', 'pencahayaan', 'gaya-visual', 'kualitas-visual', 'suara-lingkungan', 'negatif'];
+    const charFieldIds = ['nama', 'karakter', 'suara', 'aksi', 'ekspresi', 'dialog'];
 
     // =================================================================
     // FUNGSI-FUNGSI PENGELOLA
     // =================================================================
 
     function loadSceneData() {
-        document.getElementById('judul').value = sceneData.judul;
-        document.getElementById('latar').value = sceneData.latar;
-        document.getElementById('suasana').value = sceneData.suasana;
-        document.getElementById('pencahayaan').value = sceneData.pencahayaan;
-        document.getElementById('gaya-visual').value = sceneData.gayaVisual;
-        document.getElementById('kualitas-visual').value = sceneData.kualitasVisual;
-        document.getElementById('suara-lingkungan').value = sceneData.suaraLingkungan;
-        document.getElementById('negatif').value = sceneData.negatif;
-        const kameraSelect = document.getElementById('kamera');
-        for (let i = 0; i < kameraSelect.options.length; i++) {
-            if (kameraSelect.options[i].text === sceneData.kamera) {
-                kameraSelect.selectedIndex = i;
-                break;
+        sceneFieldIds.forEach(id => {
+            const element = document.getElementById(id);
+            const key = id.replace(/-([a-z])/g, g => g[1].toUpperCase());
+            if (element) {
+                if(element.tagName === 'SELECT') {
+                     for (let i = 0; i < element.options.length; i++) {
+                        if (element.options[i].text === sceneData[key]) { element.selectedIndex = i; break; }
+                    }
+                } else { element.value = sceneData[key]; }
             }
-        }
+        });
     }
 
     function saveSceneData() {
-        sceneData.judul = document.getElementById('judul').value;
-        sceneData.latar = document.getElementById('latar').value;
-        sceneData.suasana = document.getElementById('suasana').value;
-        sceneData.pencahayaan = document.getElementById('pencahayaan').value;
-        sceneData.gayaVisual = document.getElementById('gaya-visual').value;
-        sceneData.kualitasVisual = document.getElementById('kualitas-visual').value;
-        sceneData.suaraLingkungan = document.getElementById('suara-lingkungan').value;
-        sceneData.negatif = document.getElementById('negatif').value;
-        const kameraSelect = document.getElementById('kamera');
-        sceneData.kamera = kameraSelect.options[kameraSelect.selectedIndex].text;
+        sceneFieldIds.forEach(id => {
+            const element = document.getElementById(id);
+            const key = id.replace(/-([a-z])/g, g => g[1].toUpperCase());
+             if (element) {
+                if(element.tagName === 'SELECT') {
+                    sceneData[key] = element.options[element.selectedIndex].text;
+                } else { sceneData[key] = element.value; }
+            }
+        });
     }
 
     function loadCharacterData(index) {
         if (index < 0 || index >= characters.length) return;
         const data = characters[index];
-        document.getElementById('nama').value = data.nama || '';
-        document.getElementById('karakter').value = data.karakter || '';
-        document.getElementById('suara').value = data.suara || '';
-        document.getElementById('aksi').value = data.aksi || '';
-        document.getElementById('ekspresi').value = data.ekspresi || '';
-        document.getElementById('dialog').value = data.dialog || '';
+        charFieldIds.forEach(id => {
+            const element = document.getElementById(id);
+            if(element) element.value = data[id] || '';
+        });
     }
 
     function saveCurrentCharacterData() {
         if (activeCharacterIndex < 0 || activeCharacterIndex >= characters.length) return;
         const data = characters[activeCharacterIndex];
-        data.nama = document.getElementById('nama').value;
-        data.karakter = document.getElementById('karakter').value;
-        data.suara = document.getElementById('suara').value;
-        data.aksi = document.getElementById('aksi').value;
-        data.ekspresi = document.getElementById('ekspresi').value;
-        data.dialog = document.getElementById('dialog').value;
+        charFieldIds.forEach(id => {
+            const element = document.getElementById(id);
+            if(element) data[id] = element.value;
+        });
     }
     
     function renderTabs() {
@@ -147,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function addCharacter() {
         if (characters.length > 0) saveCurrentCharacterData();
         const newIndex = characters.length;
+        const previousCharacter = characters[activeCharacterIndex];
         characters.push({
             nama: `Karakter ${newIndex + 1}`, karakter: '', suara: '', aksi: '', ekspresi: '', dialog: ''
         });
@@ -159,13 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveCurrentCharacterData();
-        saveSceneData(); // Simpan juga data adegan terakhir
-        
-        generateBtn.textContent = 'Membuat Prompt...';
+        saveSceneData();
+        generateBtn.textContent = 'Menerjemahkan & Membuat Prompt...';
         generateBtn.disabled = true;
-
         const { promptID, promptEN } = await generatePrompts(sceneData, characters);
-
         promptIdOutput.value = promptID;
         promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
         generateBtn.textContent = 'Buat Prompt Gabungan';
@@ -182,27 +161,56 @@ document.addEventListener('DOMContentLoaded', () => {
     initialize();
 
     // =================================================================
-    // FUNGSI GENERATE PROMPT & HELPERS
+    // FUNGSI GENERATE PROMPT & HELPERS (DENGAN LOGIKA TRANSLATE PENUH)
     // =================================================================
     async function generatePrompts(currentSceneData, allCharacters) {
         if (allCharacters.length === 0) {
-            return { promptID: "Tidak ada karakter untuk dibuatkan prompt.", promptEN: "No characters to generate a prompt for." };
+            return { promptID: "...", promptEN: "..." };
         }
 
-        const characterDetails = allCharacters.map(char => {
-            return `**[Karakter: ${char.nama}]**
-- Deskripsi: ${char.karakter || '(tidak ada deskripsi)'}
-- Suara: ${char.suara || '(tidak ada detail suara)'}
-- Aksi: ${char.aksi || '(tidak ada aksi)'}
-- Ekspresi: ${char.ekspresi || '(tidak ada ekspresi)'}
-- Dialog: ${char.dialog || '(tidak ada dialog)'}`;
+        // --- PROMPT BAHASA INDONESIA (TIDAK BERUBAH) ---
+        const characterDetailsID = allCharacters.map(char => {
+            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(...)'}\n- Suara: ${char.suara || '(...)'}\n- Aksi: ${char.aksi || '(...)'}\n- Ekspresi: ${char.ekspresi || '(...)'}\n- Dialog: ${char.dialog || '(...)'}`;
+        }).join('\n\n');
+        const promptID = `**[Judul Adegan]**\n${currentSceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetailsID}\n\n**[Latar & Suasana]**\n${currentSceneData.latar}. ${currentSceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${currentSceneData.kamera}.\nPencahayaan: ${currentSceneData.pencahayaan}.\nGaya Visual: ${currentSceneData.gayaVisual}, ${currentSceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${currentSceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${currentSceneData.negatif}`;
+
+        // --- PROMPT BAHASA INGGRIS (LOGIKA BARU) ---
+        const t = (text) => translateText(text, 'en', 'id');
+
+        // 1. Terjemahkan semua data adegan secara bersamaan
+        const [
+            judulEn, latarEn, suasanaEn, pencahayaanEn, 
+            gayaVisualEn, kualitasVisualEn, suaraLingkunganEn, negatifEn
+        ] = await Promise.all([
+            t(currentSceneData.judul), t(currentSceneData.latar), t(currentSceneData.suasana), 
+            t(currentSceneData.pencahayaan), t(currentSceneData.gayaVisual), t(currentSceneData.kualitasVisual), 
+            t(currentSceneData.suaraLingkungan.replace('SOUND:', '')), t(currentSceneData.negatif.replace('Hindari:', ''))
+        ]);
+        const cameraMovementEn = currentSceneData.kamera.match(/\(([^)]+)\)/) ? currentSceneData.kamera.match(/\(([^)]+)\)/)[1] : currentSceneData.kamera;
+
+        // 2. Terjemahkan semua data karakter secara bersamaan
+        const translatedCharacters = await Promise.all(allCharacters.map(async (char) => {
+            const [karakterEn, suaraEn, aksiEn, ekspresiEn] = await Promise.all([
+                t(char.karakter), t(char.suara), t(char.aksi), t(char.ekspresi)
+            ]);
+            return {
+                nama: char.nama, // Nama tidak perlu diterjemahkan
+                deskripsi: karakterEn,
+                suara: suaraEn,
+                aksi: aksiEn,
+                ekspresi: ekspresiEn,
+                dialog: char.dialog // Dialog tidak diterjemahkan sesuai aturan
+            };
+        }));
+
+        // 3. Susun kembali detail karakter yang sudah diterjemahkan
+        const characterDetailsEN = translatedCharacters.map(char => {
+            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(no description)'}\n- Voice: ${char.suara || '(no voice details)'}\n- Action: ${char.aksi || '(no action)'}\n- Expression: ${char.ekspresi || '(no expression)'}\n- Dialogue: ${extractDialog(char.dialog) || '(no dialogue)'}`;
         }).join('\n\n');
 
-        const promptID = `**[Judul Adegan]**\n${currentSceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetails}\n\n**[Latar & Suasana]**\n${currentSceneData.latar}. ${currentSceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${currentSceneData.kamera}.\nPencahayaan: ${currentSceneData.pencahayaan}.\nGaya Visual: ${currentSceneData.gayaVisual}, ${currentSceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${currentSceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${currentSceneData.negatif}`;
+        // 4. Susun prompt Bahasa Inggris final
+        const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
         
-        const judulEn = await translateText(currentSceneData.judul, 'en', 'id');
-        const promptEN = `**[Scene Title]**\n${judulEn}\n\n(Full English prompt generation for multiple characters can be developed next.)`;
-
         return { promptID, promptEN };
     }
     
@@ -217,13 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = `${MYMEMORY_API_URL}?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
         try {
             const response = await fetch(url);
-            if (!response.ok) throw new Error(`MyMemory API error! status: ${response.status}`);
+            if (!response.ok) throw new Error(`API error: ${response.status}`);
             const result = await response.json();
-            if (result.responseStatus !== 200) throw new Error(`MyMemory API error! message: ${result.responseDetails}`);
             return result.responseData.translatedText;
         } catch (error) {
             console.error('Translation failed:', error);
-            return `[Translation Error] ${text}`;
+            return `[Translation Error]`;
         }
     }
     
@@ -233,12 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
             navigator.clipboard.writeText(textToCopy).then(() => {
                 const originalText = button.textContent;
                 button.textContent = 'Disalin!';
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
+                setTimeout(() => { button.textContent = originalText; }, 2000);
+            }).catch(err => { console.error('Failed to copy text: ', err); });
         });
     }
 
