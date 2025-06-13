@@ -184,7 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
         generateBtn.disabled = true;
         const currentScene = story.scenes[activeSceneIndex];
         if (!currentScene) { generateBtn.textContent = 'Buat Prompt untuk Adegan Ini'; generateBtn.disabled = false; return; }
+        
         const { promptID, promptEN } = await generatePrompts(currentScene.sceneData, currentScene.characters);
+        
         promptIdOutput.value = promptID;
         promptEnOutput.innerHTML = promptEN.replace(/\n/g, '<br>');
         generateBtn.textContent = 'Buat Prompt untuk Adegan Ini';
@@ -196,8 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
         generateAllBtn.textContent = 'Membuat Naskah...';
         generateAllBtn.disabled = true;
         try {
-            let fullScriptID = `PROYEK: ${story.projectTitle || 'Naskah Lengkap'}\n====================\n\n`;
-            let fullScriptEN = `PROJECT: ${story.projectTitle || 'Full Script'}\n====================\n\n`;
+            let fullScriptID = `PROYEK: Naskah Lengkap\n====================\n\n`;
+            let fullScriptEN = `PROJECT: Full Script\n====================\n\n`;
             for (let i = 0; i < story.scenes.length; i++) {
                 const scene = story.scenes[i];
                 const { promptID, promptEN } = await generatePrompts(scene.sceneData, scene.characters);
@@ -225,12 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initialize();
 
     // =================================================================
-    // FUNGSI GENERATE PROMPT & HELPERS
+    // FUNGSI GENERATE PROMPT & HELPERS (SUDAH DIISI LENGKAP)
     // =================================================================
     async function generatePrompts(sceneData, allCharacters) {
-        if (allCharacters.length === 0) return { promptID: "...", promptEN: "..." };
+        if (!sceneData || !allCharacters || allCharacters.length === 0) return { promptID: "", promptEN: "" };
         const characterDetails = allCharacters.map(char => {
-            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(tidak ada deskripsi)'}\n- Suara: ${char.suara || '(tidak ada detail suara)'}\n- Aksi: ${char.aksi || '(tidak ada aksi)'}\n- Ekspresi: ${char.ekspresi || '(tidak ada ekspresi)'}\n- Dialog: ${char.dialog || '(tidak ada dialog)'}`;
+            return `**[Karakter: ${char.nama}]**\n- Deskripsi: ${char.karakter || '(...)'}\n- Suara: ${char.suara || '(...)'}\n- Aksi: ${char.aksi || '(...)'}\n- Ekspresi: ${char.ekspresi || '(...)'}\n- Dialog: ${char.dialog || '(...'}`;
         }).join('\n\n');
         const promptID = `**[Judul Adegan]**\n${sceneData.judul}\n\n**[INFORMASI KARAKTER DALAM ADEGAN]**\n${characterDetails}\n\n**[Latar & Suasana]**\n${sceneData.latar}. ${sceneData.suasana}.\n\n**[Detail Visual & Sinematografi]**\nGerakan Kamera: ${sceneData.kamera}.\nPencahayaan: ${sceneData.pencahayaan}.\nGaya Visual: ${sceneData.gayaVisual}, ${sceneData.kualitasVisual}.\n\n**[Audio]**\nSuara Lingkungan: ${sceneData.suaraLingkungan}\n\n**[Negative Prompt]**\n${sceneData.negatif}`;
         const t = (text) => translateText(text, 'en', 'id');
@@ -241,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return { nama: char.nama, deskripsi: karakterEn, suara: suaraEn, aksi: aksiEn, ekspresi: ekspresiEn, dialog: char.dialog };
         }));
         const characterDetailsEN = translatedCharacters.map(char => {
-            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(no description)'}\n- Voice: ${char.suara || '(no voice details)'}\n- Action: ${char.aksi || '(no action)'}\n- Expression: ${char.ekspresi || '(no expression)'}\n- Dialogue: ${extractDialog(char.dialog) || '(no dialogue)'}`;
+            return `**[Character: ${char.nama}]**\n- Description: ${char.deskripsi || '(...)'}\n- Voice: ${char.suara || '(...)'}\n- Action: ${char.aksi || '(...)'}\n- Expression: ${char.ekspresi || '(...)'}\n- Dialogue: ${extractDialog(char.dialog) || '(...'}`;
         }).join('\n\n');
         const promptEN = `**[Scene Title]**\n${judulEn}\n\n**[CHARACTER INFORMATION IN SCENE]**\n${characterDetailsEN}\n\n**[Setting & Atmosphere]**\n${latarEn}. ${suasanaEn}.\n\n**[Visual & Cinematography Details]**\nCamera Movement: ${cameraMovementEn}.\nLighting: ${pencahayaanEn}.\nVisual Style: ${gayaVisualEn}, ${kualitasVisualEn}.\n\n**[Audio]**\nAmbient Sound: SOUND: ${suaraLingkunganEn}\n\n**[Negative Prompt]**\nAvoid: ${negatifEn}`;
         return { promptID, promptEN };
