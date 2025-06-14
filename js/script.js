@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
-    // DEKLARASI ELEMEN HTML
+    // DEKLARASI ELEMEN & KONSTANTA
     // =================================================================
     const storyContainer = document.querySelector('.story-container');
     const backToListBtn = document.getElementById('back-to-list-btn');
@@ -16,17 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveToFileBtn = document.getElementById('save-to-file-btn');
     const loadFromFileBtn = document.getElementById('load-from-file-btn');
     const fileInput = document.getElementById('file-input');
-
     const LOCAL_STORAGE_KEY = 'veoPromptGeneratorStory';
     const SECRET_KEY = 'KunciRahasiaSuperAman_GantiDenganTeksUnikAnda';
 
     // =================================================================
     // STRUKTUR DATA UTAMA (THE STORY)
     // =================================================================
-    let story = {
-        projectTitle: 'Proyek Tanpa Judul',
-        scenes: []
-    };
+    let story = { projectTitle: 'Proyek Tanpa Judul', scenes: [] };
     let activeSceneIndex = -1;
 
     // =================================================================
@@ -34,16 +30,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // =================================================================
     function saveStoryToLocalStorage() {
         try {
-            if (activeSceneIndex > -1) {
-                saveCurrentSceneData();
-            }
+            if (activeSceneIndex > -1) { saveCurrentSceneData(); }
             const jsonString = JSON.stringify(story);
             const encryptedData = CryptoJS.AES.encrypt(jsonString, SECRET_KEY).toString();
             localStorage.setItem(LOCAL_STORAGE_KEY, encryptedData);
             console.log("Proyek disimpan.");
-        } catch (error) {
-            console.error("Gagal menyimpan:", error);
-        }
+        } catch (error) { console.error("Gagal menyimpan:", error); }
     }
 
     function loadStoryFromLocalStorage() {
@@ -70,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const defaultFileName = story.projectTitle || "proyek-cerita";
             const requestedFileName = prompt("Masukkan nama untuk file proyek Anda:", defaultFileName);
             if (!requestedFileName) return;
-
             story.projectTitle = requestedFileName;
             const jsonString = JSON.stringify(story, null, 2);
             const encryptedData = CryptoJS.AES.encrypt(jsonString, SECRET_KEY).toString();
@@ -84,9 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error("Gagal menyimpan file:", error);
-        }
+        } catch (error) { console.error("Gagal menyimpan file:", error); }
     }
 
     function handleLoadFromFile(event) {
@@ -102,16 +91,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const loadedStory = JSON.parse(decryptedJsonString);
                 if (loadedStory && Array.isArray(loadedStory.scenes)) {
                     story = loadedStory;
-                    activeSceneIndex = 0;
-                    initialize(true);
+                    initialize(true); // Re-inisialisasi dengan data baru
                     alert(`Proyek "${story.projectTitle || 'Tanpa Judul'}" berhasil dimuat!`);
-                } else {
-                    throw new Error("Format file tidak valid.");
-                }
-            } catch (error) {
-                console.error("Gagal memuat file:", error);
-                alert("Gagal memuat file. Pastikan file valid.");
-            }
+                } else { throw new Error("Format file tidak valid."); }
+            } catch (error) { console.error("Gagal memuat file:", error); alert("Gagal memuat file."); }
         };
         reader.readAsText(file);
         event.target.value = null;
@@ -138,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sceneListContainer.appendChild(sceneCard);
         });
     }
+
     function addScene() {
         if (activeSceneIndex > -1) saveCurrentSceneData();
         const newScene = {
@@ -149,21 +133,32 @@ document.addEventListener('DOMContentLoaded', () => {
         story.scenes.push(newScene);
         switchScene(story.scenes.length - 1);
     }
+
     function switchScene(index) {
         if (activeSceneIndex > -1) saveCurrentSceneData();
         activeSceneIndex = index;
         loadSceneData(index);
         renderSceneList();
         saveStoryToLocalStorage();
+        if (window.innerWidth <= 900) {
+            storyContainer.classList.add('mobile-view-editor');
+            storyContainer.classList.remove('mobile-view-list');
+        }
     }
+
     function deleteScene(index) {
         const sceneNameToDelete = story.scenes[index].title || `Adegan ${index + 1}`;
         if (confirm(`Anda yakin ingin menghapus "${sceneNameToDelete}"?`)) {
             story.scenes.splice(index, 1);
             if (activeSceneIndex >= index) { activeSceneIndex = Math.max(0, activeSceneIndex - 1); }
-            if (story.scenes.length === 0) { addScene(); } else { switchScene(activeSceneIndex); }
+            if (story.scenes.length === 0) {
+                addScene();
+            } else {
+                switchScene(activeSceneIndex);
+            }
         }
     }
+
     function loadSceneData(index) {
         if (index < 0 || index >= story.scenes.length) return;
         const currentScene = story.scenes[index];
@@ -180,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCharacterTabs();
         loadCharacterData();
     }
+
     function saveCurrentSceneData() {
         if (activeSceneIndex < 0 || activeSceneIndex >= story.scenes.length) return;
         const currentScene = story.scenes[activeSceneIndex];
@@ -272,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveToFileBtn.addEventListener('click', handleSaveToFile);
     loadFromFileBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleLoadFromFile);
+
     backToListBtn.addEventListener('click', () => {
         storyContainer.classList.add('mobile-view-list');
         storyContainer.classList.remove('mobile-view-editor');
@@ -282,8 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
         saveCurrentSceneData();
         const currentScene = story.scenes[activeSceneIndex];
         if (!currentScene) return;
-        const promptID = generateIndonesianPrompt(currentScene.sceneData, currentScene.characters);
-        promptIdOutput.value = promptID;
+        promptIdOutput.value = generateIndonesianPrompt(currentScene.sceneData, currentScene.characters);
+        promptEnOutput.innerHTML = '';
     });
 
     generateAllBtn.addEventListener('click', () => {
@@ -294,18 +291,32 @@ document.addEventListener('DOMContentLoaded', () => {
             fullScriptID += `--- ADEGAN ${index + 1}: ${scene.title} ---\n\n${promptID}\n\n\n`;
         }
         promptIdOutput.value = fullScriptID;
+        promptEnOutput.innerHTML = '';
     });
 
+    // =================================================================
+    // FUNGSI INISIALISASI (DENGAN PERBAIKAN LOGIKA MOBILE)
+    // =================================================================
     function initialize(isReloading = false) {
-        if (!isReloading && loadStoryFromLocalStorage() && story.scenes.length > 0) {
-            activeSceneIndex = 0;
-        } else if (story.scenes.length === 0) {
-            addScene();
-            return;
+        let loaded = false;
+        if (!isReloading) {
+            loaded = loadStoryFromLocalStorage();
         }
-        switchScene(activeSceneIndex);
-        if(window.innerWidth <= 900) {
+
+        if (loaded && story.scenes.length > 0) {
+            activeSceneIndex = 0;
+            switchScene(0);
+        } else if (isReloading) {
+            activeSceneIndex = 0;
+            switchScene(0);
+        } else {
+            addScene();
+        }
+
+        // Tentukan view awal untuk mobile SETELAH semuanya siap
+        if (window.innerWidth <= 900) {
             storyContainer.classList.add('mobile-view-list');
+            storyContainer.classList.remove('mobile-view-editor');
         }
     }
     
@@ -330,6 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setupCopyButton(copyIdBtn, promptIdOutput);
+    // Hapus setup untuk tombol copy EN karena elemennya sudah tidak ada
+    // setupCopyButton(copyEnBtn, promptEnOutput);
     
     initialize();
 });
