@@ -448,3 +448,43 @@ button[type="submit"]:hover, .copy-btn:hover {
 .file-operations button:hover {
     background-color: #5a6268;
 }
+/* =================================== */
+/* GAYA RESPONSIVE UNTUK MOBILE       */
+/* =================================== */
+
+/* Aturan ini hanya akan aktif untuk layar dengan lebar 900px atau kurang */
+@media (max-width: 900px) {
+    .story-container {
+        /* Ubah dari 3 kolom menjadi 1 kolom vertikal */
+        grid-template-columns: 1fr;
+        /* Hentikan tinggi 100vh agar halaman bisa di-scroll ke bawah */
+        height: auto;
+        min-height: 100vh;
+    }
+
+    #storyboard-panel, #editor-panel, #output-panel {
+        /* Hentikan overflow-y karena sekarang body-lah yang akan scroll */
+        overflow-y: visible;
+        height: auto;
+    }
+
+    /* Membuat panel storyboard tidak terlalu tinggi di mobile */
+    #storyboard-panel {
+        max-height: 50vh;
+    }
+
+    /* Di mobile, form grid juga sebaiknya 1 kolom agar tidak sempit */
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Area output juga dibuat vertikal */
+    .output-area {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tombol-tombol utama di bawah output dibuat vertikal juga */
+    .main-action-buttons {
+        flex-direction: column;
+    }
+}
