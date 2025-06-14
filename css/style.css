@@ -62,7 +62,7 @@ input[type="text"]:focus, textarea:focus, select:focus {
 
 textarea { resize: vertical; min-height: 80px; }
 
-button[type="submit"], .copy-btn {
+button[type="submit"] {
     padding: 1rem 1.5rem; font-size: 1rem; font-weight: 600;
     color: #fff; background: var(--primary-color); border: none;
     border-radius: 8px; cursor: pointer; transition: all 0.2s;
@@ -75,7 +75,7 @@ button[type="submit"]:hover { background: var(--hover-color); transform: transla
 .output-column p { font-size: 0.9rem; color: var(--label-color); margin-bottom: 1rem; }
 #prompt-id { height: 300px; }
 
-.copy-btn { margin-top: 1rem; align-self: flex-start; padding: 0.6rem 1.2rem; font-size: 0.9rem; background: var(--label-color); color: #fff; }
+.copy-btn { margin-top: 1rem; align-self: flex-start; padding: 0.6rem 1.2rem; font-size: 0.9rem; background: var(--label-color); color: #fff; border:none; border-radius: 6px; cursor:pointer; }
 .copy-btn:hover { background: #333; }
 
 .story-container { display: grid; grid-template-columns: 300px 1fr; width: 100%; height: 100vh; gap: 1px; background-color: var(--border-color); }
@@ -109,13 +109,33 @@ button[type="submit"]:hover { background: var(--hover-color); transform: transla
 .tab-btn:hover .delete-btn { background-color: rgba(255, 0, 0, 0.1); }
 .tab-btn.active .delete-btn { color: #fff; }
 .tab-btn.active:hover .delete-btn { background-color: rgba(255, 255, 255, 0.2); }
-.file-operations { display: flex; gap: 0.5rem; margin-top: 1rem; }
-.file-operations button { flex: 1; padding: 0.6rem; font-size: 0.85rem; background-color: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background-color 0.2s; }
-.file-operations button:hover { background-color: #5a6268; }
 .site-footer { padding-top: 1.5rem; text-align: center; }
 .site-footer p { font-size: 0.8rem; color: var(--label-color); }
 .back-button { display: none; margin-bottom: 1rem; padding: 0.6rem 1rem; background-color: var(--label-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; align-self: flex-start; }
 .back-button:hover { background-color: #333; }
+
+/* GAYA UNTUK SIMPAN/MUAT FILE - GAYA DEFAULT UNTUK DESKTOP */
+.file-operations {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.file-operations button {
+    flex: 1; /* <-- Membuat tombol memanjang di desktop */
+    padding: 0.6rem;
+    font-size: 0.85rem;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.file-operations button:hover {
+    background-color: #5a6268;
+}
 
 @media (max-width: 900px) {
     .story-container { grid-template-columns: 1fr; height: 100vh; overflow: hidden; }
@@ -124,4 +144,13 @@ button[type="submit"]:hover { background: var(--hover-color); transform: transla
     .story-container.mobile-view-editor #editor-panel { display: flex; overflow-y: auto; }
     .back-button { display: block; }
     .form-grid { grid-template-columns: 1fr; }
+
+    /* ATURAN BARU UNTUK MEMBUAT TOMBOL SIMPAN/MUAT JADI RINGKAS DI MOBILE */
+    .file-operations {
+        justify-content: center; /* Posisikan di tengah */
+    }
+    .file-operations button {
+        flex: none; /* Matikan sifat memanjang */
+        padding: 0.6rem 1rem; /* Beri padding horizontal agar tidak terlalu sempit */
+    }
 }
